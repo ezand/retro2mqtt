@@ -1,5 +1,7 @@
 {:paths ["src"]
- :deps {com.hivemq/hivemq-mqtt-client {:mvn/version "1.3.10"}}
+ :deps {cheshire/cheshire {:mvn/version "6.1.0"}
+        com.hivemq/hivemq-mqtt-client {:mvn/version "1.3.10"}
+        superstring/superstring {:mvn/version "3.2.1"}}
  :aliases
  {;; Run with clj -T:build function-in-build
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.10" :git/sha "deedd62"}}
