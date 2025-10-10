@@ -1,0 +1,12 @@
+{:paths ["src"]
+ :deps {}
+ :aliases
+ {;; Run with clj -T:build function-in-build
+  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.10" :git/sha "deedd62"}}
+          :ns-default build}
+  :dev {:paths ["src" "dev"]}
+  ;; Run with clj -M:run
+  :run {:main-opts ["-m" "ezand.retro2mqtt.core"]}
+  ;; Start REPL with clj -M:repl
+  :repl {:extra-deps {nrepl/nrepl {:mvn/version "1.4.0"}}
+         :main-opts ["-m" "nrepl.cmdline" "--interactive"]}}}
