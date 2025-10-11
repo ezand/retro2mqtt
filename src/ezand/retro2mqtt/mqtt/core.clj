@@ -16,7 +16,8 @@
     (string? payload) identity
     (number? payload) str
     (boolean? payload) util/bool->toggle-str
-    (coll? payload) json/generate-string))
+    (coll? payload) json/generate-string
+    :else str))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Client Creation and Connection ;;

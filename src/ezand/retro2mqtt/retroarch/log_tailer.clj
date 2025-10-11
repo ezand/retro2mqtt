@@ -1,8 +1,11 @@
 (ns ezand.retro2mqtt.retroarch.log-tailer
   (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [clojure.set :as set]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
             [ezand.retro2mqtt.utils :as util]
+            [ezand.retro2mqtt.retroarch.info-file :as info]
             [superstring.core :as str])
   (:import (java.io File RandomAccessFile)))
 
@@ -73,38 +76,46 @@
 ;; Tail Log File ;;
 ;;;;;;;;;;;;;;;;;;;
 (def ^:private ^:const interesting-log-patterns
-  {:core-libretro-file {:regexp #"\[INFO\] \[Core\]: Loading dynamic libretro core from: \"(.+)\""
-                        :update-fn first-match
-                        :on-match-fn (fn [publish-fn data]
-                                       (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file data false)
-                                       (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file data false)
-                                       ; TODO get core details from info-file
-                                       ;(publish-fn retroarch-mqtt/topic-retroarch-core nil false)
-                                       ;(publish-fn retroarch-mqtt/topic-topic-retroarch-core-last-loaded-core nil true)
-                                       )}
+  {:core-libretro-file
+   {:regexp #"\[INFO\] \[Core\]: Loading dynamic libretro core from: \"(.+)\""
+    :update-fn first-match
+    :on-match-fn
+    (fn [publish-fn core-file-name]
+      (let [core-file (when core-file-name (io/file core-file-name))
+            core-file-without-ext (when core-file (util/filename-without-extension core-file))
+            core-info (-> (when core-file (io/file (.getParentFile (.getParentFile core-file)) "info"))
+                          (io/file (str core-file-without-ext ".info"))
+                          (info/parse-info))
+            core-details (-> (select-keys core-info [:corename :display-name :authors :license
+                                                     :display-version :description :supported-extensions
+                                                     :manufacturer :systemname :systemid :notes])
+                             (set/rename-keys {:corename :name
+                                               :systemid :system-id
+                                               :systemname :system-name}))]
+        (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file core-file false)
+        (publish-fn retroarch-mqtt/topic-retroarch-core (:display_name core-info) false)
+        (publish-fn retroarch-mqtt/topic-retroarch-core-details core-details false)
+        (publish-fn retroarch-mqtt/topic-retroarch-core-last-loaded (:display_name core-info) true)))}
    :content {:regexp #"\[INFO\] \[Content\]: Loading content file: \"(?:.*#)?([^#\"]+?)(?:\.[^.\"]+)?\""
              :update-fn first-match
-             :on-match-fn
-             (fn [publish-fn data]
-               (publish-fn retroarch-mqtt/topic-retroarch-content data false)
-               (publish-fn retroarch-mqtt/topic-retroarch-content-last-played data true)
-               (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? (util/bool->toggle-str true) false)
-               (publish-fn retroarch-mqtt/topic-retroarch-content-running? (util/bool->toggle-str true) false)
-               ; TODO publish content image
-               ; TODO read details from content file?
-               )}
-   :content-unloaded?
-   {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
-    :update-fn some?
-    :on-match-fn (fn [publish-fn _]
-                   (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file nil false)
-                   (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? (util/bool->toggle-str false) false)
-                   (publish-fn retroarch-mqtt/topic-retroarch-content nil false)
-                   (publish-fn retroarch-mqtt/topic-retroarch-content-running? (util/bool->toggle-str false) false)
-                   (publish-fn retroarch-mqtt/topic-retroarch-content-crc32 nil false)
-                   (publish-fn retroarch-mqtt/topic-retroarch-core nil false)
-                   ; TODO remove core and content details
-                   )}
+             :on-match-fn (fn [publish-fn data]
+                            (publish-fn retroarch-mqtt/topic-retroarch-content data false)
+                            (publish-fn retroarch-mqtt/topic-retroarch-content-last-played data true)
+                            (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
+                            (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
+                            ; TODO publish content image
+                            ; TODO read details from content file?
+                            )}
+   :content-unloaded? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
+                       :update-fn some?
+                       :on-match-fn (fn [publish-fn _]
+                                      (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file nil false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? false false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-content nil false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-content-running? false false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-content-crc32 nil false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-core nil false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-core-details nil false))}
    :content-crc32 {:regexp #"\[INFO\] \[Content\]: CRC32: (0x[0-9a-fA-F]+)"
                    :update-fn #(format "%08x" (Long/parseLong (subs (first-match %) 2) 16))
                    :state-topic retroarch-mqtt/topic-retroarch-content-crc32}

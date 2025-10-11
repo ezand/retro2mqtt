@@ -52,4 +52,5 @@
       (def retroarch-config* {:log-dir (io/file (System/getenv "RETROARCH_LOG_DIR"))}))
 
   (-start-listening! mqtt-client* retroarch-config*)
+
   (-stop-listening!))

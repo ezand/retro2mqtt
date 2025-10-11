@@ -1,4 +1,6 @@
-(ns ezand.retro2mqtt.utils)
+(ns ezand.retro2mqtt.utils
+  (:require [clojure.java.io :as io]
+            [superstring.core :as str]))
 
 (defmacro with-suppressed-errors
   "Suppress any errors, but prints them so we know they occurred."
@@ -14,3 +16,8 @@
   [bool-value]
   (when (some? bool-value)
     (if bool-value "on" "off")))
+
+(defn filename-without-extension
+  [path]
+  (let [file (.getName (io/file path))]
+    (str/replace file #"\.[^.]+$" "")))

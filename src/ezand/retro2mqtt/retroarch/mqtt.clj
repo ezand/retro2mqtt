@@ -4,6 +4,7 @@
 ;; State Topcis ;;
 ;;;;;;;;;;;;;;;;;;
 (def ^:const topic-retroarch-core "retroarch/core")
+(def ^:const topic-retroarch-core-details "retroarch/core/details")
 (def ^:const topic-retroarch-core-last-loaded "retroarch/core/last_loaded")
 (def ^:const topic-retroarch-content "retroarch/content")
 (def ^:const topic-retroarch-content-last-played "retroarch/content/last_played")

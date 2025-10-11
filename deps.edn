@@ -1,12 +1,13 @@
 {:paths ["src"]
  :deps {cheshire/cheshire {:mvn/version "6.1.0"}
         com.hivemq/hivemq-mqtt-client {:mvn/version "1.3.10"}
+        medley/medley {:mvn/version "1.4.0"}
         superstring/superstring {:mvn/version "3.2.1"}}
  :aliases
  {;; Run with clj -T:build function-in-build
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.10" :git/sha "deedd62"}}
           :ns-default build}
-  :dev {:paths ["src" "dev"]}
+  :dev {:paths ["src" "dev" "dev-resources"]}
   ;; Run with clj -M:run
   :run {:main-opts ["-m" "ezand.retro2mqtt.core"]}
   ;; Start REPL with clj -M:repl
