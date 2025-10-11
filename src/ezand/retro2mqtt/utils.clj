@@ -9,3 +9,8 @@
      (catch Throwable e#
        (.printStackTrace e#)
        nil)))
+
+(defn bool->toggle-str
+  [bool-value]
+  (when (some? bool-value)
+    (if bool-value "on" "off")))

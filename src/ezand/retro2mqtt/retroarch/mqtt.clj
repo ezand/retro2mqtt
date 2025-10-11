@@ -1,7 +1,12 @@
 (ns ezand.retro2mqtt.retroarch.mqtt)
 
+;;;;;;;;;;;;;;;;;;
+;; State Topcis ;;
+;;;;;;;;;;;;;;;;;;
 (def ^:const topic-retroarch-core "retroarch/core")
 (def ^:const topic-retroarch-content "retroarch/content")
+(def ^:const topic-retroarch-content-loaded? "retroarch/content/loaded")
+(def ^:const topic-retroarch-content-running? "retroarch/content/running")
 (def ^:const topic-retroarch-content-crc32 "retroarch/content/crc32")
 (def ^:const topic-retroarch-content-video-size "retroarch/content/video_size")
 (def ^:const topic-retroarch-system-cpu "retroarch/system/cpu")
@@ -16,3 +21,8 @@
 (def ^:const topic-retroarch-version-build-date "retroarch/version/build_date")
 (def ^:const topic-retroarch-version-git-hash "retroarch/version/git_hash")
 (def ^:const topic-retroarch-cmd-interface-port "retroarch/cmd_interface_port")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; HomeAssistant Discovery ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TODO
