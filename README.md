@@ -60,4 +60,4 @@ java -jar target/retro2mqtt-*-standalone.jar
 
 ## License
 
-See LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
