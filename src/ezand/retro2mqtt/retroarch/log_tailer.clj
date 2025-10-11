@@ -77,13 +77,17 @@
                         :update-fn first-match
                         :on-match-fn (fn [publish-fn data]
                                        (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file data false)
+                                       (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file data false)
                                        ; TODO get core details from info-file
+                                       ;(publish-fn retroarch-mqtt/topic-retroarch-core nil false)
+                                       ;(publish-fn retroarch-mqtt/topic-topic-retroarch-core-last-loaded-core nil true)
                                        )}
    :content {:regexp #"\[INFO\] \[Content\]: Loading content file: \"(?:.*#)?([^#\"]+?)(?:\.[^.\"]+)?\""
              :update-fn first-match
              :on-match-fn
              (fn [publish-fn data]
                (publish-fn retroarch-mqtt/topic-retroarch-content data false)
+               (publish-fn retroarch-mqtt/topic-retroarch-content-last-played data true)
                (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? (util/bool->toggle-str true) false)
                (publish-fn retroarch-mqtt/topic-retroarch-content-running? (util/bool->toggle-str true) false)
                ; TODO publish content image
