@@ -173,7 +173,6 @@
    (loop [current-file nil
           raf nil
           position 0]
-     (println (format "Checking... [%s]" (str @keep-listening?)))
      (if-not @keep-listening?
        (do
          (println (str printer/green "✅ Stopped tailing RetroArch log file" printer/reset))
@@ -198,10 +197,12 @@
            (if-let [line (.readLine raf)]
              (do
                (when-let [[pattern-key data state-topic retain? on-match-fn] (match-line patterns line)]
-                 (cond
-                   state-topic (publish-fn state-topic (maybe-serialize-data data) retain?)
-                   on-match-fn (on-match-fn publish-fn data)
-                   :else (println (format "Unhandled pattern match key (%s): %s" pattern-key data))))
+                 (try (cond
+                        state-topic (publish-fn state-topic (maybe-serialize-data data) retain?)
+                        on-match-fn (on-match-fn publish-fn data)
+                        :else (println (format "Unhandled pattern match key (%s): %s" pattern-key data)))
+                      (catch Throwable t
+                        (.printStackTrace t))))
                (recur current-file raf (.getFilePointer raf)))
              (do
                (Thread/sleep ^Long poll-interval-ms)

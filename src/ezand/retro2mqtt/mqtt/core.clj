@@ -1,10 +1,26 @@
 (ns ezand.retro2mqtt.mqtt.core
+  (:require [cheshire.core :as json]
+            [ezand.retro2mqtt.utils :as util])
   (:import (com.hivemq.client.mqtt MqttClient)
            (com.hivemq.client.mqtt.datatypes MqttQos)
            (com.hivemq.client.mqtt.mqtt3 Mqtt3BlockingClient)
            (java.nio.charset StandardCharsets)
            (java.util UUID)))
 
+;;;;;;;;;;;
+;; Utils ;;
+;;;;;;;;;;;
+(defn- ensure-string-payload
+  [payload]
+  (cond-> payload
+    (string? payload) identity
+    (number? payload) str
+    (boolean? payload) util/bool->toggle-str
+    (coll? payload) json/generate-string))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Client Creation and Connection ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn create-client
   "Create an MQTT client.
 
@@ -43,6 +59,9 @@
   [^Mqtt3BlockingClient mqtt-client]
   (.disconnect mqtt-client))
 
+;;;;;;;;;;;;;
+;; Publish ;;
+;;;;;;;;;;;;;
 (defn publish!
   "Publish a message to a topic.
 
@@ -59,7 +78,7 @@
                      0 MqttQos/AT_MOST_ONCE
                      1 MqttQos/AT_LEAST_ONCE
                      2 MqttQos/EXACTLY_ONCE)
-         payload-bytes (when payload (.getBytes ^String payload StandardCharsets/UTF_8))]
+         payload-bytes (when payload (.getBytes ^String (ensure-string-payload payload) StandardCharsets/UTF_8))]
      (-> mqtt-client
          (.publishWith)
          (.topic topic)
