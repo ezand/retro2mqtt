@@ -1,5 +1,9 @@
 (ns ezand.retro2mqtt.retroarch.log-tailer
-  (:require [cheshire.core :as json])
+  (:require [cheshire.core :as json]
+            [ezand.retro2mqtt.printer :as printer]
+            [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
+            [ezand.retro2mqtt.utils :as util]
+            [superstring.core :as str])
   (:import (java.io File RandomAccessFile)))
 
 ;;;;;;;;;;;
@@ -68,8 +72,57 @@
 ;;;;;;;;;;;;;;;;;;;
 ;; Tail Log File ;;
 ;;;;;;;;;;;;;;;;;;;
-; TODO
-(def ^:private ^:const interesting-log-patterns {})
+(def ^:private ^:const interesting-log-patterns
+  {:content {:regexp #"\[INFO\] \[Content\]: Loading content file: \"(?:.*#)?([^#\"]+?)(?:\.[^.\"]+)?\""
+             :update-fn first-match
+             :state-topic retroarch-mqtt/topic-retroarch-content}
+   :content-crc32 {:regexp #"\[INFO\] \[Content\]: CRC32: (0x[0-9a-fA-F]+)"
+                   :update-fn #(format "%08x" (Long/parseLong (subs (first-match %) 2) 16))
+                   :state-topic retroarch-mqtt/topic-retroarch-content-crc32}
+   :content-video-size {:regexp #"\[INFO\] \[Video\]: Set video size to: (\d+x\d+)"
+                        :update-fn first-match
+                        :state-topic retroarch-mqtt/topic-retroarch-content-video-size}
+   :system-cpu {:regexp #"\[INFO\] CPU Model Name: (.+)"
+                :update-fn first-match
+                :state-topic retroarch-mqtt/topic-retroarch-system-cpu
+                :retain? true}
+   :system-capabilities {:regexp #"\[INFO\] Capabilities: (.+)"
+                         :update-fn #(str/split (first-match %) #" ")
+                         :state-topic retroarch-mqtt/topic-retroarch-system-capabilities}
+   :system-display-driver {:regexp #"\[INFO\] \[Display\]: Found display driver: \"(.+)\""
+                           :update-fn first-match
+                           :state-topic retroarch-mqtt/topic-retroarch-system-display-driver}
+   :system-joypad-driver {:regexp #"\[INFO\] \[Joypad\]: Found joypad driver: \"(.+)\"."
+                          :update-fn first-match
+                          :state-topic retroarch-mqtt/topic-retroarch-system-joypad-driver}
+   :system-audio-input-rate {:regexp #"\[INFO\] \[Audio\]: Set audio input rate to: (.+)."
+                             :update-fn first-match
+                             :state-topic retroarch-mqtt/topic-retroarch-system-audio-input-rate}
+   :system-pixel-format {:regexp #"\[INFO\] \[Environ\]: SET_PIXEL_FORMAT: (.+)."
+                         :update-fn first-match
+                         :state-topic retroarch-mqtt/topic-retroarch-system-pixel-format}
+   :libretro-api-version {:regexp #"\[INFO\] \[Core\]: Version of libretro API: (.+), Compiled against API: (.+)"
+                          :update-fn first-match
+                          :state-topic retroarch-mqtt/topic-retroarch-libretro-api-version}
+   :retroarch-version {:regexp #"\[INFO\] Version: (.+)"
+                       :update-fn first-match
+                       :state-topic retroarch-mqtt/topic-retroarch-version}
+   :retroarch-version-build-date {:regexp #"\[INFO\] Built: (.+)"
+                                  :update-fn first-match
+                                  :state-topic retroarch-mqtt/topic-retroarch-version-build-date}
+   :retroarch-git-hash {:regexp #"\[INFO\] Git: (.+)"
+                        :update-fn first-match
+                        :state-topic retroarch-mqtt/topic-retroarch-version-git-hash}
+   :retroarch-cmd-interface-port {:regexp #"\[INFO\] \[NetCMD\]: bringing_up_command_interface_at_port (.+)."
+                                  :update-fn #(util/with-suppressed-errors (Integer/parseInt (first-match %)))
+                                  :state-topic retroarch-mqtt/topic-retroarch-cmd-interface-port}
+   :retroarch-core-libretro-file {:regexp #"\[INFO\] \[Content\]: Updating firmware status for: \"([^\"]+)\""
+                                  :update-fn first-match
+                                  :state-topic retroarch-mqtt/topic-retroarch-libretro-core-file}
+   :retroarch-unloaded-core? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
+                              :update-fn some?
+                              ; TODO get core from info-file
+                              :on-match-fn (fn [key data] (println "Manually handling: " key " -> " data))}})
 
 (defn tail-log-file!
   "Tail most recent RetroArch log file in directory, switching to newer logs as they appear.
@@ -87,11 +140,14 @@
                        (println (format "Publish to %s (retain?=%s): %s" state-topic data retain?)))
           poll-interval-ms 100
           wait-interval-ms 1000}}]
+   (println (str printer/yellow "♻️ Tailing latest RetroArch log-file in " (.getAbsoluteFile log-dir) printer/reset))
    (loop [current-file nil
           raf nil
           position 0]
      (if-not @keep-listening?
-       (close-reader raf)
+       (do
+         (println (str printer/green "✅ Stopped tailing RetroArch log file" printer/reset))
+         (close-reader raf))
        (let [latest-file (most-recent-log-file log-dir)]
          (cond
            ;; No log file yet, wait and retry
@@ -120,3 +176,24 @@
              (do
                (Thread/sleep ^Long poll-interval-ms)
                (recur current-file raf position)))))))))
+
+;;;;;;;;;;;;;
+;; Testing ;;
+;;;;;;;;;;;;;
+(comment
+  (match-line interesting-log-patterns "[INFO] [Content]: Loading content file: \"/Users/user/Library/Application Support/RetroArch/downloads/Super Mario World (U) [!].zip#Super Mario World (U) [!].smc\".")
+  (match-line interesting-log-patterns "[INFO] [Content]: CRC32: 0xa31bead4.")
+  (match-line interesting-log-patterns "[INFO] [Video]: Set video size to: 897x672.")
+  (match-line interesting-log-patterns "[INFO] CPU Model Name: Apple M2 Max")
+  (match-line interesting-log-patterns "[INFO] Capabilities: NEON VFPV3 VFPV4")
+  (match-line interesting-log-patterns "[INFO] Version: 1.21.0")
+  (match-line interesting-log-patterns "[INFO] Git: 05f94af4")
+  (match-line interesting-log-patterns "[INFO] Built: Apr 30 2025")
+  (match-line interesting-log-patterns "[INFO] [Display]: Found display driver: \"vulkan\".")
+  (match-line interesting-log-patterns "[INFO] [NetCMD]: bringing_up_command_interface_at_port 55355.")
+  (match-line interesting-log-patterns "[INFO] [Audio]: Set audio input rate to: 48000.00 Hz.")
+  (match-line interesting-log-patterns "[INFO] [Joypad]: Found joypad driver: \"mfi\".")
+  (match-line interesting-log-patterns "[INFO] [Core]: Version of libretro API: 1, Compiled against API: 1")
+  (match-line interesting-log-patterns "[INFO] [Environ]: SET_PIXEL_FORMAT: RGB565.")
+  (match-line interesting-log-patterns "[INFO] [Core]: Content ran for a total of: 00 hours, 00 minutes, 00 seconds.")
+  (match-line interesting-log-patterns "[INFO] [Content]: Updating firmware status for: \"/Users/user/Library/Application Support/RetroArch/cores/bsnes2014_accuracy_libretro.dylib\" on \"/Users/user/Documents/RetroArch/system\".\n"))
