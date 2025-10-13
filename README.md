@@ -1,6 +1,48 @@
 # retro2mqtt
 
-A Clojure application for bridging retro systems to MQTT.
+A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro gaming sessions.
+
+## Overview
+
+retro2mqtt monitors retro gaming platforms and publishes detailed information about gaming sessions to MQTT topics. This enables home automation systems, status displays, and other integrations to respond to gaming activity in real-time.
+
+The application extracts information from multiple sources:
+- **Platform log files** - Real-time monitoring of emulator activity and system information
+- **ROM files** - Metadata extraction from game files (title, region, ROM type, etc.)
+- **Platform metadata** - Core information, system specifications, and configuration details
+
+### Supported Platforms
+
+Currently supported:
+- **RetroArch** - Comprehensive support for log monitoring and ROM analysis
+
+Planned support:
+- **LaunchBox** - Integration with LaunchBox frontend
+- **HyperSpin** - Integration with HyperSpin frontend
+
+## Setup
+
+### RetroArch Configuration
+
+To enable retro2mqtt to monitor RetroArch activity, you must enable logging in RetroArch:
+
+1. Open RetroArch
+2. Navigate to **Settings → Logging**
+3. Enable the following options:
+   - **Logging Verbosity** - Set to `1 (Info)` or higher
+   - **Log to File** - Enable this option
+   - **Timestamp Log Files** - Enable this option (recommended)
+4. Note the log file directory location (typically `~/.config/retroarch/logs` on Linux/macOS or `%APPDATA%\RetroArch\logs` on Windows)
+5. Configure retro2mqtt to point to this directory
+
+The application will automatically detect and tail the most recent log file, switching to newer logs as they are created.
+
+### MQTT Broker
+
+You'll need an MQTT broker running and accessible. Popular options include:
+- Mosquitto
+- HiveMQ
+- EMQX
 
 ## Development
 

@@ -15,7 +15,6 @@
 ;;;;;;;;;;;;;;;;;;;;
 (defn- publish-event!
   [mqtt-client topic data retain?]
-  (println "PUB:" topic data)
   (mqtt/publish! mqtt-client topic data {:retain? (boolean retain?)}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
