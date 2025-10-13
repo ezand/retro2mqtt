@@ -30,3 +30,6 @@
       (when-not (str/blank? trimmed)
         trimmed))))
 
+(defn homeassistant-config-topic
+  [unique-id]
+  (format "homeassistant/sensor/%s/config" unique-id))

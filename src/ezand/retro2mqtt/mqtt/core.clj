@@ -71,7 +71,7 @@
   - :retain - Retain message flag (default: false)"
   ([mqtt-client topic payload]
    (publish! mqtt-client topic payload {}))
-  ([^Mqtt3BlockingClient mqtt-client ^String topic ^String payload
+  ([^Mqtt3BlockingClient mqtt-client ^String topic payload
     {:keys [qos retain?]
      :or {qos 0
           retain? false}}]

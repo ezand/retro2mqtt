@@ -1,8 +1,6 @@
 (ns ezand.retro2mqtt.core
-  (:gen-class))
-
-;; ANSI color codes
-(def green "\u001B[32m")
+  (:gen-class)
+  (:require [ezand.retro2mqtt.printer :as printer]))
 
 (defn -main [& args]
-  (println (str green "✅ retro2mqtt started!")))
+  (println (str printer/green "✅ retro2mqtt started!")))
