@@ -3,9 +3,10 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [ezand.retro2mqtt.printer :as printer]
-            [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
-            [ezand.retro2mqtt.utils :as util]
             [ezand.retro2mqtt.retroarch.info-file :as info]
+            [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
+            [ezand.retro2mqtt.rom.core :as rom]
+            [ezand.retro2mqtt.utils :as util]
             [superstring.core :as str])
   (:import (java.io File RandomAccessFile)))
 
@@ -96,15 +97,19 @@
         (publish-fn retroarch-mqtt/topic-retroarch-core (:display_name core-info) false)
         (publish-fn retroarch-mqtt/topic-retroarch-core-details core-details false)
         (publish-fn retroarch-mqtt/topic-retroarch-core-last-loaded (:display_name core-info) true)))}
-   :content {:regexp #"\[INFO\] \[Content\]: Loading content file: \"(?:.*#)?([^#\"]+?)(?:\.[^.\"]+)?\""
+   :content {:regexp #"\[INFO\] \[Core\]: Using content: \"(.+)\"."
              :update-fn first-match
              :on-match-fn (fn [publish-fn data]
-                            (publish-fn retroarch-mqtt/topic-retroarch-content data false)
-                            (publish-fn retroarch-mqtt/topic-retroarch-content-last-played data true)
-                            (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
-                            (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
+                            (let [metadata (rom/extract-metadata data)
+                                  game-title (or (util/trim-to-nil (:game-title metadata))
+                                                 (util/trim-to-nil (:fallback-title metadata)))
+                                  rom-details (dissoc metadata [:game-title :fallback-title])]
+                              (publish-fn retroarch-mqtt/topic-retroarch-content game-title false)
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-last-played game-title true)
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-details rom-details false))
                             ; TODO publish content image
-                            ; TODO read details from content file?
                             )}
    :content-unloaded? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
                        :update-fn some?
@@ -228,6 +233,7 @@
 ;;;;;;;;;;;;;
 (comment
   (match-line interesting-log-patterns "[INFO] [Core]: Loading dynamic libretro core from: \"/Users/user/Library/Application Support/RetroArch/cores/bsnes2014_accuracy_libretro.dylib\"")
+  (match-line interesting-log-patterns "[INFO] [Core]: Using content: \"/Users/user/Library/Application Support/RetroArch/downloads/Super Mario World (U) [!].zip\".")
   (match-line interesting-log-patterns "[INFO] [Content]: CRC32: 0xa31bead4.")
   (match-line interesting-log-patterns "[INFO] [Video]: Set video size to: 897x672.")
   (match-line interesting-log-patterns "[INFO] CPU Model Name: Apple M2 Max")

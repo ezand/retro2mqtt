@@ -21,3 +21,12 @@
   [path]
   (let [file (.getName (io/file path))]
     (str/replace file #"\.[^.]+$" "")))
+
+(defn trim-to-nil
+  "Trim string and return nil if empty or already nil"
+  [s]
+  (when s
+    (let [trimmed (str/trim s)]
+      (when-not (str/blank? trimmed)
+        trimmed))))
+

@@ -80,10 +80,13 @@
                      1 MqttQos/AT_LEAST_ONCE
                      2 MqttQos/EXACTLY_ONCE)
          payload-bytes (when payload (.getBytes ^String (ensure-string-payload payload) StandardCharsets/UTF_8))]
-     (-> mqtt-client
-         (.publishWith)
-         (.topic topic)
-         (.payload payload-bytes)
-         (.qos qos-level)
-         (.retain retain?)
-         (.send)))))
+     (try (-> mqtt-client
+              (.publishWith)
+              (.topic topic)
+              (.payload payload-bytes)
+              (.qos qos-level)
+              (.retain retain?)
+              (.send))
+          (catch Throwable t
+            (.printStackTrace t)
+            (throw t))))))
