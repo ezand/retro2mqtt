@@ -28,3 +28,4 @@ pom.xml.asc
 
 # Misc
 dev.env
+dev-config.edn

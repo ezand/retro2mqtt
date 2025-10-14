@@ -74,6 +74,7 @@ Run the application directly:
 
 ```bash
 clj -M:run
+clj -A:dev -M:run
 ```
 
 ### Building
@@ -98,6 +99,8 @@ Run the uberjar:
 
 ```bash
 java -jar target/retro2mqtt-*-standalone.jar
+
+java -Dconfig=dev-config.edn -jar target/retro2mqtt-0.0.14-standalone.jar
 ```
 
 ## License

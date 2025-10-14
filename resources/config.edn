@@ -1,0 +1,8 @@
+{:retro2mqtt
+ {:mqtt {:host "localhost"
+         :port 1883
+         :client-id-prefix "retro2mqtt"}
+  :retroarch {:enabled? true}
+  :launchbox {:enabled? false}
+  :hyperspin {:enabled? false}
+  :integrations {:home-assistant {:discovery? true}}}}

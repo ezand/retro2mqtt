@@ -1,7 +1,6 @@
 (ns ezand.retro2mqtt.retroarch.log-tailer
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [clojure.set :as set]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.retroarch.info-file :as info]
             [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
@@ -86,29 +85,20 @@
             core-file-without-ext (when core-file (util/filename-without-extension core-file))
             core-info (-> (when core-file (io/file (.getParentFile (.getParentFile core-file)) "info"))
                           (io/file (str core-file-without-ext ".info"))
-                          (info/parse-info))
-            core-details (-> (select-keys core-info [:corename :display-name :authors :license
-                                                     :display-version :description :supported-extensions
-                                                     :manufacturer :systemname :systemid :notes])
-                             (set/rename-keys {:corename :name
-                                               :systemid :system-id
-                                               :systemname :system-name}))]
+                          (info/parse-info))]
         (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file core-file false)
         (publish-fn retroarch-mqtt/topic-retroarch-core (:display_name core-info) false)
-        (publish-fn retroarch-mqtt/topic-retroarch-core-details core-details false)
         (publish-fn retroarch-mqtt/topic-retroarch-core-last-loaded (:display_name core-info) true)))}
    :content {:regexp #"\[INFO\] \[Core\]: Using content: \"(.+)\"."
              :update-fn first-match
              :on-match-fn (fn [publish-fn data]
                             (let [metadata (rom/extract-metadata data)
                                   game-title (or (util/trim-to-nil (:game-title metadata))
-                                                 (util/trim-to-nil (:fallback-title metadata)))
-                                  rom-details (dissoc metadata [:game-title :fallback-title])]
+                                                 (util/trim-to-nil (:fallback-title metadata)))]
                               (publish-fn retroarch-mqtt/topic-retroarch-content game-title false)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-last-played game-title true)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
-                              (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
-                              (publish-fn retroarch-mqtt/topic-retroarch-content-details rom-details false))
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false))
                             ; TODO publish content image
                             )}
    :content-unloaded? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
@@ -119,8 +109,7 @@
                                       (publish-fn retroarch-mqtt/topic-retroarch-content nil false)
                                       (publish-fn retroarch-mqtt/topic-retroarch-content-running? false false)
                                       (publish-fn retroarch-mqtt/topic-retroarch-content-crc32 nil false)
-                                      (publish-fn retroarch-mqtt/topic-retroarch-core nil false)
-                                      (publish-fn retroarch-mqtt/topic-retroarch-core-details nil false))}
+                                      (publish-fn retroarch-mqtt/topic-retroarch-core nil false))}
    :content-crc32 {:regexp #"\[INFO\] \[Content\]: CRC32: (0x[0-9a-fA-F]+)"
                    :update-fn #(format "%08x" (Long/parseLong (subs (first-match %) 2) 16))
                    :state-topic retroarch-mqtt/topic-retroarch-content-crc32}
