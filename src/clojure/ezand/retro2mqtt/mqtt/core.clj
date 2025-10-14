@@ -1,13 +1,11 @@
 (ns ezand.retro2mqtt.mqtt.core
   (:require [cheshire.core :as json]
-            [ezand.retro2mqtt.utils :as util]
-            [superstring.core :as str])
+            [ezand.retro2mqtt.utils :as util])
   (:import (com.hivemq.client.mqtt MqttClient MqttGlobalPublishFilter)
            (com.hivemq.client.mqtt.datatypes MqttQos)
            (com.hivemq.client.mqtt.mqtt5 Mqtt5BlockingClient)
            (com.hivemq.client.mqtt.mqtt5.message.publish Mqtt5Publish)
            (com.hivemq.client.mqtt.mqtt5.message.subscribe Mqtt5Subscription)
-           (com.hivemq.client.mqtt.mqtt5.message.subscribe.suback Mqtt5SubAck)
            (java.nio.charset StandardCharsets)
            (java.util UUID)))
 
@@ -22,18 +20,6 @@
     (boolean? payload) util/bool->toggle-str
     (coll? payload) json/generate-string
     :else str))
-
-(defn- parse-payload
-  "Parse payload bytes to string and optionally parse JSON."
-  [payload-bytes parse-json?]
-  (when payload-bytes
-    (let [payload-str (String. payload-bytes StandardCharsets/UTF_8)]
-      (if parse-json?
-        (try
-          (json/parse-string payload-str true)
-          (catch Exception _
-            payload-str))
-        payload-str))))
 
 (def ^:private kwd->qos
   {:exactly-once MqttQos/EXACTLY_ONCE
@@ -118,21 +104,18 @@
 (defn subscribe!
   [^Mqtt5BlockingClient mqtt-client topics qos callback-fn]
   (try
-    (let [subscriptions (->> (map #(-> (Mqtt5Subscription/builder)
-                                       (.topicFilter ^String %)
-                                       (.qos (get kwd->qos qos MqttQos/AT_LEAST_ONCE))
-                                       (.build))
-                                  topics))
-          ^Mqtt5SubAck sub-ack (-> (.subscribeWith mqtt-client)
-                                   (.addSubscriptions subscriptions)
-                                   (.send))]
-      (println (format "Subscribed to %s with return codes: %s" (str/join "," topics)
-                       (map #(.name %) (.getReasonCodes sub-ack))))
-
-      (-> (.toAsync mqtt-client)
-          (.publishes MqttGlobalPublishFilter/ALL
-                      (fn [^Mqtt5Publish publish]
-                        (callback-fn (.getPayloadAsBytes publish))))))
+    (-> (.subscribeWith mqtt-client)
+        (.addSubscriptions (map #(-> (Mqtt5Subscription/builder)
+                                     (.topicFilter ^String %)
+                                     (.qos (get kwd->qos qos MqttQos/AT_LEAST_ONCE))
+                                     (.build))
+                                topics))
+        (.send))
+    (-> (.toAsync mqtt-client)
+        (.publishes MqttGlobalPublishFilter/ALL
+                    (fn [^Mqtt5Publish publish]
+                      (callback-fn (str (.getTopic publish))
+                                   (.getPayloadAsBytes publish)))))
     (catch Throwable t
       (.printStackTrace t)
       (throw t))))

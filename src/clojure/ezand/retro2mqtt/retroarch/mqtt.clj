@@ -1,5 +1,6 @@
 (ns ezand.retro2mqtt.retroarch.mqtt
   (:require [ezand.retro2mqtt.mqtt.core :as mqtt]
+            [ezand.retro2mqtt.mqtt.multi-topic :as topics]
             [ezand.retro2mqtt.utils :as util]))
 
 ;;;;;;;;;;;;;;;;;;
@@ -7,10 +8,8 @@
 ;;;;;;;;;;;;;;;;;;
 (def ^:const topic-retroarch-status "retroarch/status")
 (def ^:const topic-retroarch-core "retroarch/core")
-(def ^:const topic-retroarch-core-details "retroarch/core/details")
 (def ^:const topic-retroarch-core-last-loaded "retroarch/core/last_loaded")
 (def ^:const topic-retroarch-content "retroarch/content")
-(def ^:const topic-retroarch-content-details "retroarch/content/details")
 (def ^:const topic-retroarch-content-last-played "retroarch/content/last_played")
 (def ^:const topic-retroarch-content-loaded? "retroarch/content/loaded")
 (def ^:const topic-retroarch-content-running? "retroarch/content/running")
@@ -43,6 +42,7 @@
 
 ;; Topics
 (def ^:privat ^:const topic-homeassistant-retroarch-attributes "homeassistant/sensor/retroarch_attributes")
+(def ^:privat ^:const topic-homeassistant-core-attributes "homeassistant/sensor/retroarch_core_attributes")
 (def ^:privat ^:const topic-homeassistant-content-attributes "homeassistant/sensor/retroarch_content_attributes")
 
 ;; Entity Configuration
@@ -51,10 +51,23 @@
     :name "Retroarch"
     :state_topic topic-retroarch-status
     :json_attributes_topic topic-homeassistant-retroarch-attributes
+    :attribute-state-topics [topic-retroarch-system-cpu
+                             topic-retroarch-system-capabilities
+                             topic-retroarch-system-display-driver
+                             topic-retroarch-system-joypad-driver
+                             topic-retroarch-system-audio-input-rate
+                             topic-retroarch-system-pixel-format
+                             topic-retroarch-libretro-api-version
+                             topic-retroarch-version
+                             topic-retroarch-version-build-date
+                             topic-retroarch-version-git-hash
+                             topic-retroarch-cmd-interface-port]
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_core"
     :name "Loaded Core"
     :state_topic topic-retroarch-core
+    :json_attributes_topic topic-homeassistant-core-attributes
+    :attribute-state-topics [topic-retroarch-libretro-core-file]
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_core_last_loaded"
     :name "Last Loaded Core"
@@ -64,6 +77,8 @@
     :name "Current Game"
     :state_topic topic-retroarch-content
     :json_attributes_topic topic-homeassistant-content-attributes
+    :attribute-state-topics [topic-retroarch-content-crc32
+                             topic-retroarch-content-video-size]
     :icon "mdi:gamepad-variant"}
    {:unique_id "retroarch_content_last_played"
     :name "Last Played Game"
@@ -79,26 +94,24 @@
     :icon "mdi:gamepad-variant"}])
 
 ;; Publish Configurations
-(defn publish-retroarch-attributes!
-  [mqtt-client retroarch-details]
-  (mqtt/publish! mqtt-client topic-homeassistant-retroarch-attributes retroarch-details {:retain true}))
-
-(defn publish-content-attributes!
-  [mqtt-client content-details]
-  (mqtt/publish! mqtt-client topic-homeassistant-content-attributes content-details {:retain true}))
-
 (defn publish-homeassistant-discovery!
   ([mqtt-client]
    (publish-homeassistant-discovery! mqtt-client false))
   ([mqtt-client remove-entities?]
    ; TODO get retroarch version initially
    (let [device (retroarch-device-config "")
-         entities (map (fn [{:keys [unique_id] :as config}]
-                         (assoc config :topic (util/homeassistant-config-topic unique_id)
-                                       :device device))
+         entities (map (fn [{:keys [unique_id json_attributes_topic attribute-state-topics] :as config}]
+                         (when (and json_attributes_topic attribute-state-topics)
+                           (topics/subscribe-topics!
+                             mqtt-client unique_id attribute-state-topics json_attributes_topic true))
+                         (-> (assoc config :topic (util/homeassistant-config-topic unique_id)
+                                       :device device)
+                             (dissoc :attribute-state-topics)))
                        entity-configurations)]
      (doseq [{:keys [topic] :as entity-config} entities]
-       (mqtt/publish! mqtt-client topic (when-not remove-entities? (dissoc entity-config :topic)) {:retain true})))))
+       (mqtt/publish! mqtt-client topic
+                      (when-not remove-entities? (dissoc entity-config :topic))
+                      {:retain true})))))
 
 ;;;;;;;;;;;;;
 ;; Testing ;;
@@ -109,10 +122,8 @@
 
   (do (mqtt/publish! mqtt-client* topic-retroarch-status "running")
       (mqtt/publish! mqtt-client* topic-retroarch-core "snes")
-      (mqtt/publish! mqtt-client* topic-retroarch-core-details {:foo "bar"})
       (mqtt/publish! mqtt-client* topic-retroarch-core-last-loaded "snes")
       (mqtt/publish! mqtt-client* topic-retroarch-content "Super Mario")
-      (mqtt/publish! mqtt-client* topic-retroarch-content-details {:sna "fu"})
       (mqtt/publish! mqtt-client* topic-retroarch-content-last-played "Street Fighter")
       (mqtt/publish! mqtt-client* topic-retroarch-content-loaded? true)
       (mqtt/publish! mqtt-client* topic-retroarch-content-running? true)
@@ -129,11 +140,7 @@
       (mqtt/publish! mqtt-client* topic-retroarch-version "1.2.3")
       (mqtt/publish! mqtt-client* topic-retroarch-version-build-date "1. Aug 2022")
       (mqtt/publish! mqtt-client* topic-retroarch-version-git-hash "abc123")
-      (mqtt/publish! mqtt-client* topic-retroarch-cmd-interface-port 53553)
-      (mqtt/publish! mqtt-client* topic-homeassistant-retroarch-attributes nil {:retain true})
-      (mqtt/publish! mqtt-client* topic-homeassistant-content-attributes nil {:retain true})
-      (publish-retroarch-attributes! mqtt-client* {:sna "baz"})
-      (publish-content-attributes! mqtt-client* {:fux "baz"}))
+      (mqtt/publish! mqtt-client* topic-retroarch-cmd-interface-port 53553))
 
   ; Add entities
   (publish-homeassistant-discovery! mqtt-client*)
@@ -141,4 +148,5 @@
   ; Remove entities
   (do (publish-homeassistant-discovery! mqtt-client* true)
       (mqtt/publish! mqtt-client* topic-homeassistant-retroarch-attributes nil {:retain true})
+      (mqtt/publish! mqtt-client* topic-homeassistant-core-attributes nil {:retain true})
       (mqtt/publish! mqtt-client* topic-homeassistant-content-attributes nil {:retain true})))
