@@ -1,3 +1,5 @@
+![alt text](docs/retro2mqtt_banner.png)
+
 # retro2mqtt
 
 A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro gaming sessions.
