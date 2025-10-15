@@ -100,7 +100,8 @@
                               (publish-fn retroarch-mqtt/topic-retroarch-content game-title false)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-last-played game-title true)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
-                              (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false))
+                              (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
+                              (publish-fn retroarch-mqtt/topic-retroarch-status "running" false))
                             ; TODO publish content image
                             )}
    :content-unloaded? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
@@ -111,7 +112,8 @@
                                       (publish-fn retroarch-mqtt/topic-retroarch-content nil false)
                                       (publish-fn retroarch-mqtt/topic-retroarch-content-running? false false)
                                       (publish-fn retroarch-mqtt/topic-retroarch-content-crc32 nil false)
-                                      (publish-fn retroarch-mqtt/topic-retroarch-core nil false))}
+                                      (publish-fn retroarch-mqtt/topic-retroarch-core nil false)
+                                      (publish-fn retroarch-mqtt/topic-retroarch-status "idle" false))}
    :content-crc32 {:regexp #"\[INFO\] \[Content\]: CRC32: (0x[0-9a-fA-F]+)"
                    :update-fn #(format "%08x" (Long/parseLong (subs (first-match %) 2) 16))
                    :state-topic retroarch-mqtt/topic-retroarch-content-crc32}
