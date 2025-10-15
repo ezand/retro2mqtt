@@ -29,3 +29,7 @@ pom.xml.asc
 # Misc
 dev.env
 dev-config.edn
+
+# Docker
+.dockerignore
+docker-compose.override.yml
