@@ -2,13 +2,16 @@
 
 # retro2mqtt
 
-A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro gaming sessions.
+A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro
+gaming sessions.
 
 ## Overview
 
-retro2mqtt monitors retro gaming platforms and publishes detailed information about gaming sessions to MQTT topics. This enables home automation systems, status displays, and other integrations to respond to gaming activity in real-time.
+retro2mqtt monitors retro gaming platforms and publishes detailed information about gaming sessions to MQTT topics. This
+enables home automation systems, status displays, and other integrations to respond to gaming activity in real-time.
 
 The application extracts information from multiple sources:
+
 - **Platform log files** - Real-time monitoring of emulator activity and system information
 - **ROM files** - Metadata extraction from game files (title, region, ROM type, etc.)
 - **Platform metadata** - Core information, system specifications, and configuration details
@@ -16,9 +19,11 @@ The application extracts information from multiple sources:
 ### Supported Platforms
 
 Currently supported:
+
 - **RetroArch** - Comprehensive support for log monitoring and ROM analysis
 
 Planned support:
+
 - **LaunchBox** - Integration with LaunchBox frontend
 - **HyperSpin** - Integration with HyperSpin frontend
 
@@ -31,20 +36,36 @@ To enable retro2mqtt to monitor RetroArch activity, you must enable logging in R
 1. Open RetroArch
 2. Navigate to **Settings → Logging**
 3. Enable the following options:
-   - **Logging Verbosity** - Set to `1 (Info)` or higher
-   - **Log to File** - Enable this option
-   - **Timestamp Log Files** - Enable this option (recommended)
-4. Note the log file directory location (typically `~/.config/retroarch/logs` on Linux/macOS or `%APPDATA%\RetroArch\logs` on Windows)
+    - **Logging Verbosity** - Set to `1 (Info)` or higher
+    - **Log to File** - Enable this option
+    - **Timestamp Log Files** - Enable this option (recommended)
+4. Note the log file directory location (typically `~/.config/retroarch/logs` on Linux/macOS or
+   `%APPDATA%\RetroArch\logs` on Windows)
 5. Configure retro2mqtt to point to this directory
 
-The application will automatically detect and tail the most recent log file, switching to newer logs as they are created.
+The application will automatically detect and tail the most recent log file, switching to newer logs as they are
+created.
 
 ### MQTT Broker
 
 You'll need an MQTT broker running and accessible. Popular options include:
+
 - Mosquitto
 - HiveMQ
 - EMQX
+
+### Home Assistant Integration
+
+retro2mqtt supports [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery) for seamless
+Home Assistant integration. When enabled in the configuration, entities are automatically created in Home Assistant
+without manual setup:
+
+```edn
+:integrations {:home-assistant {:discovery? true}}
+```
+
+With discovery enabled, gaming session information appears automatically as sensors in Home Assistant, enabling
+automations based on what game you're playing, which core is running, and other metadata.
 
 ## Development
 
@@ -109,7 +130,7 @@ java -Dconfig=dev-config.edn -jar target/retro2mqtt-0.0.14-standalone.jar
 
 #### Docker Compose
 
-The project includes a `docker-compose.yml` file that runs 
+The project includes a `docker-compose.yml` file that runs
 Mosquitto MQTT broker and Home Assistant on a shared network.
 
 Start all services:
@@ -125,6 +146,7 @@ docker compose down
 ```
 
 **Default credentials:**
+
 - **Home Assistant**: username: `retro`, password: `retro` (http://localhost:8123)
 - **Mosquitto MQTT**: username: `mosquitto`, password: `mosquitto`
 
