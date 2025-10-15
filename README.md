@@ -107,13 +107,36 @@ java -Dconfig=dev-config.edn -jar target/retro2mqtt-0.0.14-standalone.jar
 
 ### Docker
 
+#### Docker Compose
+
+The project includes a `docker-compose.yml` file that runs 
+Mosquitto MQTT broker and Home Assistant on a shared network.
+
+Start all services:
+
+```bash
+docker compose up -d
+```
+
+Stop all services:
+
+```bash
+docker compose down
+```
+
+**Default credentials:**
+- **Home Assistant**: username: `retro`, password: `retro` (http://localhost:8123)
+- **Mosquitto MQTT**: username: `mosquitto`, password: `mosquitto`
+
+#### Standalone Docker
+
 Build the Docker image:
 
 ```bash
 docker build -t retro2mqtt .
 ```
 
-#### Networking
+##### Networking
 
 To connect to services running on the host machine (like an MQTT broker), use `--network host`:
 
@@ -121,10 +144,10 @@ To connect to services running on the host machine (like an MQTT broker), use `-
 docker run --network host retro2mqtt
 ```
 
-This allows the container to access `localhost` services on the host. Alternatively, you can configure the MQTT host 
+This allows the container to access `localhost` services on the host. Alternatively, you can configure the MQTT host
 as `host.docker.internal` in your config file (works on Docker Desktop for Mac/Windows).
 
-#### Running
+##### Running
 
 Run with bundled config:
 

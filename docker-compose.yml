@@ -26,16 +26,3 @@ services:
 networks:
   retro:
     driver: bridge
-
-#  retro2mqtt:
-#    build: .
-#    container_name: retro2mqtt
-#    network_mode: host
-#    volumes:
-#      - ./config.edn:/app/config.edn
-#      - ~/.config/retroarch/logs:/app/retroarch/logs:ro
-#    environment:
-#      - CONFIG_FILE=config.edn
-#    restart: unless-stopped
-#    depends_on:
-#      - mosquitto
