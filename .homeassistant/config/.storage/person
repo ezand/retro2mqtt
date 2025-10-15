@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "minor_version": 1,
+  "key": "person",
+  "data": {
+    "items": [
+      {
+        "id": "retro",
+        "name": "Retro",
+        "user_id": "4a2e106c45d5488d8eb2301927fe00f3",
+        "device_trackers": []
+      }
+    ]
+  }
+}

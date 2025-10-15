@@ -34,4 +34,3 @@ dev-config.edn
 .dockerignore
 docker-compose.override.yml
 .homeassistant
-.mosquitto

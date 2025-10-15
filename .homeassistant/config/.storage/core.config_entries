@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "minor_version": 5,
+  "key": "core.config_entries",
+  "data": {
+    "entries": [
+      {"created_at":"2025-10-15T11:10:01.253506+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"sun","entry_id":"01K7KS03157Y4T5GD9BP80MQX7","minor_version":1,"modified_at":"2025-10-15T11:10:01.253508+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"import","subentries":[],"title":"Sun","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:10:01.747852+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"go2rtc","entry_id":"01K7KS03GKF5M80T5GJE8GCQVW","minor_version":1,"modified_at":"2025-10-15T11:10:01.747854+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"system","subentries":[],"title":"go2rtc","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:10:01.758261+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"backup","entry_id":"01K7KS03GY7QCRN0X37VSNWTFQ","minor_version":1,"modified_at":"2025-10-15T11:10:01.758263+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"system","subentries":[],"title":"Backup","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:16:57.198843+00:00","data":{"language":"en","tld":"com"},"disabled_by":null,"discovery_keys":{},"domain":"google_translate","entry_id":"01K7KSCS7EEMD0MQ14B33ETTZT","minor_version":1,"modified_at":"2025-10-15T11:16:57.198845+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Google Translate text-to-speech","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:16:57.201889+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"shopping_list","entry_id":"01K7KSCS7HDPMG59RSJZ95ZJM1","minor_version":1,"modified_at":"2025-10-15T11:16:57.201890+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Shopping list","unique_id":"shopping_list","version":1},
+      {"created_at":"2025-10-15T11:16:57.253157+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"radio_browser","entry_id":"01K7KSCS95YGY4K1WC047F2BHS","minor_version":1,"modified_at":"2025-10-15T11:16:57.253165+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Radio Browser","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:16:57.257924+00:00","data":{"track_home":true},"disabled_by":null,"discovery_keys":{},"domain":"met","entry_id":"01K7KSCS991T3D50Y3Y1JRGDQG","minor_version":1,"modified_at":"2025-10-15T11:16:57.257926+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Home","unique_id":null,"version":1},
+      {"created_at":"2025-10-15T11:18:03.140156+00:00","data":{"broker":"mosquitto","password":"mosquitto","port":1883,"username":"mosquitto"},"disabled_by":null,"discovery_keys":{},"domain":"mqtt","entry_id":"01K7KSESM4CD2AFV7Y9MSNKNHZ","minor_version":2,"modified_at":"2025-10-15T11:18:03.140158+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"user","subentries":[],"title":"mosquitto","unique_id":null,"version":1}
+    ]
+  }
+}

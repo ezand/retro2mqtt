@@ -2,7 +2,8 @@ services:
   mosquitto:
     image: eclipse-mosquitto
     container_name: mosquitto
-    network_mode: host
+    networks:
+      - retro
     ports:
       - "1883:1883"
     volumes:
@@ -12,7 +13,8 @@ services:
   homeassistant:
     image: homeassistant/home-assistant
     container_name: homeassistant
-    network_mode: host
+    networks:
+      - retro
     ports:
       - "8123:8123"
     volumes:
@@ -20,6 +22,10 @@ services:
     environment:
       - TZ=Norway/Oslo
     restart: unless-stopped
+
+networks:
+  retro:
+    driver: bridge
 
 #  retro2mqtt:
 #    build: .
