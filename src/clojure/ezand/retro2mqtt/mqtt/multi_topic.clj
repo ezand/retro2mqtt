@@ -1,5 +1,7 @@
 (ns ezand.retro2mqtt.mqtt.multi-topic
-  (:require [ezand.retro2mqtt.mqtt.core :as mqtt]
+  (:require [cheshire.core :as json]
+            [clojure.set :as set]
+            [ezand.retro2mqtt.mqtt.core :as mqtt]
             [superstring.core :as str])
   (:import (java.nio.charset StandardCharsets)))
 
@@ -12,32 +14,38 @@
 ;; Subscribe ;;
 ;;;;;;;;;;;;;;;
 (defn subscribe-topics!
-  [mqtt-client state-identifier topics target-topic retain?]
-  (println (format "Subscribe to multi-topics [%s]: %s" (name state-identifier) (str/join "," topics)))
-  (mqtt/subscribe!
-    mqtt-client topics :at-least-once
-    (fn [topic ^bytes payload]
-      ; Global subscriptions, so we need to filter on topics
-      (when (get (set topics) topic)
-        (try
-          (let [data (String. payload StandardCharsets/UTF_8)
-                data-kwd (-> (subs topic (inc (str/last-index-of topic "/")))
-                             (str/lisp-case)
-                             (keyword))
-                new-data (->> {data-kwd data}
-                              (merge (get @multi-topic-states state-identifier)))]
-            (swap! multi-topic-states assoc state-identifier new-data)
-            (mqtt/publish! mqtt-client target-topic new-data {:retain retain?}))
-          (catch Throwable t
-            (.printStackTrace t)
-            (throw t)))))))
+  [mqtt-client state-identifier topic->cfg target-topic retain?]
+  (let [topics (keys topic->cfg)]
+    (println (format "Subscribe to multi-topics [%s]: %s" (name state-identifier) (str/join "," topics)))
+    (mqtt/subscribe!
+      mqtt-client topics :at-least-once
+      (fn [topic ^bytes payload]
+        ; Global subscriptions, so we need to filter on topics
+        (when (get (set topics) topic)
+          (try
+            (let [data (String. payload StandardCharsets/UTF_8)
+                  topic-cfg (get topic->cfg topic)
+                  data-type (get topic-cfg :data-type :string)
+                  data-kwd (:key topic-cfg)
+                  new-data (case data-type
+                             :map (json/parse-string data keyword)
+                             {data-kwd data})
+                  merged-data (merge (get @multi-topic-states state-identifier)
+                                     new-data)]
+              (swap! multi-topic-states assoc state-identifier merged-data)
+              (mqtt/publish! mqtt-client target-topic merged-data {:retain (boolean retain?)}))
+            (catch Throwable t
+              (.printStackTrace t)
+              (throw t))))))))
 
 ;;;;;;;;;;;;;
 ;; Testing ;;
 ;;;;;;;;;;;;;
 (comment
-  (def mqtt-client* (-> (mqtt/create-client {:client-id (str "testing_" (rand-int 10000))})
-                        (mqtt/connect! "mosquitto" "mosquitto")))
+  (do (require '[config.core :as cfg])
+      (def config* (:retro2mqtt cfg/env))
+      (def mqtt-client* (-> (mqtt/create-client (:mqtt config*))
+                            (mqtt/connect! (:mqtt config*)))))
 
   (subscribe-topics! mqtt-client* :attributes
                      ["retroarch/content/crc32" "retroarch/content/video_size"]

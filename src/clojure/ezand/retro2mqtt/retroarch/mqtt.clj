@@ -8,6 +8,7 @@
 ;;;;;;;;;;;;;;;;;;
 (def ^:const topic-retroarch-status "retroarch/status")
 (def ^:const topic-retroarch-core "retroarch/core")
+(def ^:const topic-retroarch-core-details "retroarch/core/details")
 (def ^:const topic-retroarch-core-last-loaded "retroarch/core/last_loaded")
 (def ^:const topic-retroarch-content "retroarch/content")
 (def ^:const topic-retroarch-content-last-played "retroarch/content/last_played")
@@ -51,38 +52,46 @@
     :name "Retroarch"
     :state_topic topic-retroarch-status
     :json_attributes_topic topic-homeassistant-retroarch-attributes
-    :attribute-state-topics [topic-retroarch-system-cpu
-                             topic-retroarch-system-capabilities
-                             topic-retroarch-system-display-driver
-                             topic-retroarch-system-joypad-driver
-                             topic-retroarch-system-audio-input-rate
-                             topic-retroarch-system-pixel-format
-                             topic-retroarch-libretro-api-version
-                             topic-retroarch-version
-                             topic-retroarch-version-build-date
-                             topic-retroarch-version-git-hash
-                             topic-retroarch-cmd-interface-port]
+    :attribute-state-topics {topic-retroarch-system-cpu {:key :cpu}
+                             topic-retroarch-system-capabilities {:key :capabilities}
+                             topic-retroarch-system-display-driver {:key :display-driver}
+                             topic-retroarch-system-joypad-driver {:key :joypad-driver}
+                             topic-retroarch-system-audio-input-rate {:key :audio-input-rate}
+                             topic-retroarch-system-pixel-format {:key :pixel-format}
+                             topic-retroarch-libretro-api-version {:key :libretro-api-version}
+                             topic-retroarch-version {:key :retroarch-version}
+                             topic-retroarch-version-build-date {:key :retroarch-build-date}
+                             topic-retroarch-version-git-hash {:key :retroarch-version-git-hash}
+                             topic-retroarch-cmd-interface-port {:key :cmd-interface-port}}
+    :retain-attributes? true
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_core"
     :name "Loaded Core"
     :state_topic topic-retroarch-core
     :json_attributes_topic topic-homeassistant-core-attributes
-    :attribute-state-topics [topic-retroarch-libretro-core-file]
+    :attribute-state-topics {topic-retroarch-libretro-core-file {:key :libretro-core-file}
+                             topic-retroarch-core-details {:key :details :data-type :map}}
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_core_last_loaded"
     :name "Last Loaded Core"
     :state_topic topic-retroarch-core-last-loaded
+    :json_attributes_topic topic-homeassistant-core-attributes
+    :attribute-state-topics {topic-retroarch-libretro-core-file {:key :libretro-core-file}
+                             topic-retroarch-core-details {:key :details :data-type :map}}
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_content"
     :name "Current Game"
     :state_topic topic-retroarch-content
     :json_attributes_topic topic-homeassistant-content-attributes
-    :attribute-state-topics [topic-retroarch-content-crc32
-                             topic-retroarch-content-video-size]
+    :attribute-state-topics {topic-retroarch-content-crc32 {:key :crc32}
+                             topic-retroarch-content-video-size {:key :video-size}}
     :icon "mdi:gamepad-variant"}
    {:unique_id "retroarch_content_last_played"
     :name "Last Played Game"
     :state_topic topic-retroarch-content-last-played
+    :json_attributes_topic topic-homeassistant-content-attributes
+    :attribute-state-topics {topic-retroarch-content-crc32 {:key :crc32}
+                             topic-retroarch-content-video-size {:key :video-size}}
     :icon "mdi:gamepad-variant"}
    {:unique_id "retroarch_content_loaded"
     :name "Is Game Loaded"
@@ -100,14 +109,15 @@
   ([mqtt-client remove-entities?]
    ; TODO get retroarch version initially
    (let [device (retroarch-device-config "")
-         entities (map (fn [{:keys [unique_id json_attributes_topic attribute-state-topics] :as config}]
-                         (when (and json_attributes_topic attribute-state-topics)
-                           (topics/subscribe-topics!
-                             mqtt-client unique_id attribute-state-topics json_attributes_topic true))
-                         (-> (assoc config :topic (util/homeassistant-config-topic unique_id)
-                                       :device device)
-                             (dissoc :attribute-state-topics)))
-                       entity-configurations)]
+         entities (map
+                    (fn [{:keys [unique_id json_attributes_topic attribute-state-topics retain-attributes?] :as config}]
+                      (when (and json_attributes_topic attribute-state-topics)
+                        (topics/subscribe-topics!
+                          mqtt-client unique_id attribute-state-topics json_attributes_topic retain-attributes?))
+                      (-> (assoc config :topic (util/homeassistant-config-topic unique_id)
+                                        :device device)
+                          (dissoc :attribute-state-topics :retain-attributes?)))
+                    entity-configurations)]
      (doseq [{:keys [topic] :as entity-config} entities]
        (mqtt/publish! mqtt-client topic
                       (when-not remove-entities? (dissoc entity-config :topic))
@@ -117,8 +127,13 @@
 ;; Testing ;;
 ;;;;;;;;;;;;;
 (comment
-  (def mqtt-client* (-> (mqtt/create-client {:client-id (str "testing_" (rand-int 10000))})
-                        (mqtt/connect! "mosquitto" "mosquitto")))
+  (do (require '[config.core :as cfg])
+      (def config* (:retro2mqtt cfg/env))
+      (def mqtt-client* (-> (mqtt/create-client (:mqtt config*))
+                            (mqtt/connect! (:mqtt config*)))))
+
+  (mqtt/publish! mqtt-client* topic-retroarch-content-loaded? true)
+  (mqtt/publish! mqtt-client* topic-retroarch-content-loaded? false)
 
   (do (mqtt/publish! mqtt-client* topic-retroarch-status "running")
       (mqtt/publish! mqtt-client* topic-retroarch-core "snes")

@@ -86,10 +86,12 @@
             core-info (-> (when core-file (io/file (.getParentFile (.getParentFile core-file)) "info"))
                           (io/file (str core-file-without-ext ".info"))
                           (info/parse-info))]
+        ; description
         (publish-fn retroarch-mqtt/topic-retroarch-libretro-core-file core-file false)
-        (publish-fn retroarch-mqtt/topic-retroarch-core (:display_name core-info) false)
-        (publish-fn retroarch-mqtt/topic-retroarch-core-last-loaded (:display_name core-info) true)))}
-   :content {:regexp #"\[INFO\] \[Core\]: Using content: \"(.+)\"."
+        (publish-fn retroarch-mqtt/topic-retroarch-core (:systemname core-info) false)
+        (publish-fn retroarch-mqtt/topic-retroarch-core-details (dissoc core-info :systemname) false)
+        (publish-fn retroarch-mqtt/topic-retroarch-core-last-loaded (:systemname core-info) true)))}
+   :content {:regexp #"\[INFO\] \[Content\]: Loading content file: \"(.+)\"."
              :update-fn first-match
              :on-match-fn (fn [publish-fn data]
                             (let [metadata (rom/extract-metadata data)
@@ -206,6 +208,7 @@
            (if-let [line (.readLine raf)]
              (do
                (when-let [[pattern-key data state-topic retain? on-match-fn] (match-line patterns line)]
+                 (println (format "Matched log-line [%s]: %s" (name pattern-key) data))
                  (try (cond
                         state-topic (publish-fn state-topic (maybe-serialize-data data) retain?)
                         on-match-fn (on-match-fn publish-fn data)

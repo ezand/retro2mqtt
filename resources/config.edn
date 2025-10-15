@@ -1,8 +1,11 @@
 {:retro2mqtt
  {:mqtt {:host "localhost"
          :port 1883
+         :username "mosquitto"
+         :password "mosquitto"
          :client-id-prefix "retro2mqtt"}
-  :retroarch {:enabled? true}
+  :retroarch {:enabled? true
+              :log-dir "~/.config/retroarch"}
   :launchbox {:enabled? false}
   :hyperspin {:enabled? false}
   :integrations {:home-assistant {:discovery? true}}}}

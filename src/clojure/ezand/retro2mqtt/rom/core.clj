@@ -1,6 +1,7 @@
 (ns ezand.retro2mqtt.rom.core
   (:require [clojure.java.io :as io]
-            [ezand.retro2mqtt.utils :as util])
+            [ezand.retro2mqtt.utils :as util]
+            [superstring.core :as str])
   (:import (java.io RandomAccessFile)
            (java.nio.charset StandardCharsets)
            (java.util.zip ZipEntry ZipFile)))
@@ -177,17 +178,19 @@
   "Extract metadata from SMC ROM file or ZIP containing SMC file"
   [^String filepath]
   (try
-    (let [fallback-title (util/filename-without-extension filepath)
-          metadata (if (is-zip-file? filepath)
+    (let [^String real-filepath (cond-> filepath
+                                  (str/index-of filepath "#") (subs 0 (str/index-of filepath "#")))
+          fallback-title (util/filename-without-extension real-filepath)
+          metadata (if (is-zip-file? real-filepath)
                      ;; Handle ZIP file
-                     (with-open [zip-file (ZipFile. filepath)]
+                     (with-open [zip-file (ZipFile. real-filepath)]
                        (if-let [smc-entry (find-smc-in-zip zip-file)]
                          (let [rom-data (read-zip-entry-bytes zip-file smc-entry)
                                metadata (extract-metadata-from-bytes rom-data)]
                            (assoc metadata :source :zip :zip-entry-name (.getName smc-entry)))
                          (throw (Exception. "No .smc file found in ZIP archive"))))
                      ;; Handle direct SMC file
-                     (with-open [raf (RandomAccessFile. filepath "r")]
+                     (with-open [raf (RandomAccessFile. real-filepath "r")]
                        (assoc (extract-metadata-from-raf raf) :source :direct)))]
       (assoc metadata :fallback-title fallback-title))
     (catch Exception e

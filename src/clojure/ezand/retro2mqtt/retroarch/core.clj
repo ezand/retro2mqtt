@@ -1,5 +1,7 @@
 (ns ezand.retro2mqtt.retroarch.core
-  (:require [ezand.retro2mqtt.mqtt.core :as mqtt]
+  (:require [clojure.java.io :as io]
+            [ezand.retro2mqtt.mqtt.core :as mqtt]
+            [ezand.retro2mqtt.retroarch.mqtt :as retro-mqtt]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.provider :as provider]
             [ezand.retro2mqtt.retroarch.log-tailer :as log])
@@ -38,16 +40,20 @@
   (stop-listening! [this] (-stop-listening!)))
 
 (defn retroarch-provider
-  [mqtt-client config]
-  (->RetroarchProvider mqtt-client config))
+  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
+  (when discovery?
+    (retro-mqtt/publish-homeassistant-discovery! mqtt-client))
+  (let [config (update-in config [:retroarch :log-dir] io/file)]
+    (->RetroarchProvider mqtt-client (:retroarch config))))
 
 ;;;;;;;;;;;;;
 ;; Testing ;;
 ;;;;;;;;;;;;;
 (comment
-  (do (require '[clojure.java.io :as io])
-      (def mqtt-client* (-> (mqtt/create-client {:client-id (str "testing_" (rand-int 10000))})
-                            (mqtt/connect! "mosquitto" "mosquitto")))
+  (do (require '[config.core :as cfg])
+      (def config* (:retro2mqtt cfg/env))
+      (def mqtt-client* (-> (mqtt/create-client (:mqtt config*))
+                            (mqtt/connect! (:mqtt config*))))
       (def retroarch-config* {:log-dir (io/file (System/getenv "RETROARCH_LOG_DIR"))}))
 
   (-start-listening! mqtt-client* retroarch-config*)
