@@ -149,16 +149,22 @@ as `host.docker.internal` in your config file (works on Docker Desktop for Mac/W
 
 ##### Running
 
+Run with script:
+
+```bash
+./run-docker.sh /Users/user/Documents/RetroArch/logs
+```
+
 Run with bundled config:
 
 ```bash
-docker run --network host retro2mqtt
+docker run --name retro2mqtt_app --network host retro2mqtt
 ```
 
 Run with custom config file:
 
 ```bash
-docker run --network host \
+docker run --name retro2mqtt_app --network host \
   -e CONFIG_FILE=custom-config.edn \
   -v /path/to/custom-config.edn:/app/custom-config.edn \
   retro2mqtt
@@ -167,7 +173,7 @@ docker run --network host \
 Mount RetroArch logs directory for monitoring:
 
 ```bash
-docker run --network host \
+docker run --name retro2mqtt_app  --network host \
   -e CONFIG_FILE=custom-config.edn \
   -v /path/to/custom-config.edn:/app/custom-config.edn \
   -v ~/.config/retroarch/logs:/app/retroarch/logs:ro \

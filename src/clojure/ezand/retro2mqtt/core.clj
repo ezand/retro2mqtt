@@ -12,6 +12,7 @@
          {launchbox-enabled? :enabled?} :launchbox
          {hyperspin-enabled? :enabled?} :hyperspin
          :as config} (:retro2mqtt env)]
+    (printer/print-config)
     (let [mqtt-client (-> (mqtt/create-client mqtt-config)
                           (mqtt/connect! mqtt-config))]
       (when retroarch-enabled?

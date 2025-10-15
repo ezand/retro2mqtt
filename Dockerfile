@@ -18,6 +18,4 @@ WORKDIR /app
 # Copy the built uberjar
 COPY --from=builder /build/target/*-standalone.jar /app/app.jar
 
-ENV RETROARCH_LOG_DIR=/app/retroarch/logs
-
 CMD ["sh", "-c", "if [ -n \"$CONFIG_FILE\" ]; then exec java -Dconfig=\"$CONFIG_FILE\" -jar /app/app.jar; else exec java -jar /app/app.jar; fi"]

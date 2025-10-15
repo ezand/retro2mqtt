@@ -1,7 +1,7 @@
 services:
   mosquitto:
     image: eclipse-mosquitto
-    container_name: mosquitto
+    container_name: retro2mqtt_mosquitto
     networks:
       - retro
     ports:
@@ -12,7 +12,7 @@ services:
 
   homeassistant:
     image: homeassistant/home-assistant
-    container_name: homeassistant
+    container_name: retro2mqtt_homeassistant
     networks:
       - retro
     ports:

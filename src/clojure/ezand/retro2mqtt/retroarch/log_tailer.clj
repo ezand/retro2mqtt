@@ -203,6 +203,7 @@
            (do
              (close-reader raf)
              (let [new-raf (open-log-reader latest-file)]
+               (println (str printer/yellow "📄 Current RetroArch log-file: " (.getAbsolutePath latest-file) printer/reset))
                (recur latest-file new-raf (.length latest-file))))
 
            ;; Read from current log file

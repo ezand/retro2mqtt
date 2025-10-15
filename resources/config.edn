@@ -5,7 +5,7 @@
          :password "mosquitto"
          :client-id-prefix "retro2mqtt"}
   :retroarch {:enabled? true
-              :log-dir "~/.config/retroarch"}
+              :log-dir "/app/retroarch/logs"}
   :launchbox {:enabled? false}
   :hyperspin {:enabled? false}
   :integrations {:home-assistant {:discovery? true}}}}
