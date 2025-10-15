@@ -1,5 +1,9 @@
 ![alt text](docs/retro2mqtt_banner.png)
 
+[![Deploy](https://github.com/ezand/retro2mqtt/actions/workflows/build.yml/badge.svg)](https://github.com/ezand/retro2mqtt/actions/workflows/build.yml)
+[![GitHub License](https://img.shields.io/github/license/ezand/retro2mqtt)](https://choosealicense.com/licenses/mit/)
+![GitHub top language](https://img.shields.io/github/languages/top/ezand/retro2mqtt)
+
 # retro2mqtt
 
 A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro
