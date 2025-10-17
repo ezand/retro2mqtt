@@ -1,4 +1,4 @@
-![alt text](docs/retro2mqtt_banner.png)
+![Banner](docs/retro2mqtt_banner.png)
 
 [![Deploy](https://github.com/ezand/retro2mqtt/actions/workflows/build.yml/badge.svg)](https://github.com/ezand/retro2mqtt/actions/workflows/build.yml)
 [![GitHub License](https://img.shields.io/github/license/ezand/retro2mqtt)](https://choosealicense.com/licenses/mit/)
@@ -28,6 +28,7 @@ The application extracts information from multiple sources:
 Currently supported:
 
 - **RetroArch** - Comprehensive support for log monitoring and ROM analysis
+  - Tested with v1.21.0
 
 Planned support:
 

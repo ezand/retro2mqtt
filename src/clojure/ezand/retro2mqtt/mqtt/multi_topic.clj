@@ -1,6 +1,5 @@
 (ns ezand.retro2mqtt.mqtt.multi-topic
   (:require [cheshire.core :as json]
-            [clojure.set :as set]
             [ezand.retro2mqtt.mqtt.core :as mqtt]
             [superstring.core :as str])
   (:import (java.nio.charset StandardCharsets)))
