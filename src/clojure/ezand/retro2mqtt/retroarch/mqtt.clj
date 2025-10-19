@@ -42,12 +42,12 @@
    :sw_version retroarch-version})
 
 ;; Topics
-(def ^:privat ^:const topic-homeassistant-retroarch-attributes "homeassistant/sensor/retroarch_attributes")
-(def ^:privat ^:const topic-homeassistant-core-attributes "homeassistant/sensor/retroarch_core_attributes")
-(def ^:privat ^:const topic-homeassistant-content-attributes "homeassistant/sensor/retroarch_content_attributes")
+(def ^:private ^:const topic-homeassistant-retroarch-attributes "homeassistant/sensor/retroarch_attributes")
+(def ^:private ^:const topic-homeassistant-core-attributes "homeassistant/sensor/retroarch_core_attributes")
+(def ^:private ^:const topic-homeassistant-content-attributes "homeassistant/sensor/retroarch_content_attributes")
 
 ;; Entity Configuration
-(def ^:const ^:private entity-configurations
+(def ^:private ^:const entity-configurations
   [{:unique_id "retroarch"
     :name "Retroarch"
     :state_topic topic-retroarch-status

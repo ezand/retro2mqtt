@@ -1,6 +1,7 @@
 (ns ezand.retro2mqtt.core
   (:gen-class)
   (:require [config.core :refer [env]]
+            [ezand.retro2mqtt.launchbox.core :as launchbox]
             [ezand.retro2mqtt.mqtt.core :as mqtt]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.provider :as provider]
@@ -17,6 +18,9 @@
                           (mqtt/connect! mqtt-config))]
       (when retroarch-enabled?
         (->> (retroarch/retroarch-provider mqtt-client config)
-             (provider/start-listening!))))
+             (provider/start-listening!)))
+      (when launchbox-enabled?
+        (-> (launchbox/launchbox-provider mqtt-client config)
+            (provider/start-listening!))))
 
     (println (str printer/green "✅ retro2mqtt started!" printer/reset))))
