@@ -27,14 +27,18 @@ The application extracts information from multiple sources:
 
 Currently supported:
 
-- **RetroArch** - Comprehensive support for log monitoring and ROM analysis.
-  - Tested with v1.21.0
-- **LaunchBox / BigBox** - Integration via [launchbox2mqtt](https://github.com/ezand/launchbox2mqtt/) LaunchBox plugin.
-  - Tested with v13.24
+- **[RetroArch](https://www.retroarch.com/)** - Comprehensive support for log monitoring and ROM analysis.
+    - Tested with v1.21.0
+- **[LaunchBox / BigBox](https://www.launchbox-app.com/)** - Integration
+  via [launchbox2mqtt](https://github.com/ezand/launchbox2mqtt/) LaunchBox plugin.
+    - Tested with v13.24
 
-Planned support:
+Planned / potential support:
 
-- **HyperSpin** - Integration with HyperSpin frontend
+- **[HyperSpin](https://hyperspin-fe.com/)**
+- **[EmulationStation](https://emulationstation.org/) / [ES-DE](https://es-de.org/)**
+- **[Attract‑Mode](https://attractmode.org/)**
+- **[Pegasus](https://pegasus-frontend.org/)**
 
 ## Setup
 
@@ -57,17 +61,17 @@ created.
 
 ### 📡 MQTT Broker
 
-You'll need an MQTT broker running and accessible. Popular options include:
+You'll need an [MQTT](https://mqtt.org/) broker running and accessible. Popular options include:
 
-- Mosquitto
-- HiveMQ
-- EMQX
+- [Mosquitto](https://mosquitto.org/)
+- [HiveMQ](https://www.hivemq.com/)
+- [EMQX](https://www.emqx.com/)
 
 ### 🏠 Home Assistant Integration
 
 retro2mqtt supports [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery) for seamless
-Home Assistant integration. When enabled in the configuration, entities are automatically created in Home Assistant
-without manual setup:
+[Home Assistant](https://www.home-assistant.io/) integration. When enabled in the configuration, entities are
+automatically created in Home Assistant without manual setup:
 
 ```edn
 :integrations {:home-assistant {:discovery? true}}
