@@ -9,7 +9,7 @@
 
 # retro2mqtt
 
-A Clojure application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro
+An application that bridges retro gaming systems to MQTT, enabling real-time monitoring and automation of retro
 gaming sessions.
 
 ## 👀 Overview
@@ -27,12 +27,13 @@ The application extracts information from multiple sources:
 
 Currently supported:
 
-- **RetroArch** - Comprehensive support for log monitoring and ROM analysis
+- **RetroArch** - Comprehensive support for log monitoring and ROM analysis.
   - Tested with v1.21.0
+- **LaunchBox / BigBox** - Integration via [launchbox2mqtt](https://github.com/ezand/launchbox2mqtt/) LaunchBox plugin.
+  - Tested with v13.24
 
 Planned support:
 
-- **LaunchBox** - Integration with LaunchBox frontend
 - **HyperSpin** - Integration with HyperSpin frontend
 
 ## Setup
