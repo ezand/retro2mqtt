@@ -3,6 +3,7 @@
             [ezand.retro2mqtt.mqtt.core :as mqtt]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.provider :as provider]
+            [ezand.retro2mqtt.retroarch.udp-connector :as retro-udp]
             [ezand.retro2mqtt.retroarch.config-extractor :as config-extractor]
             [ezand.retro2mqtt.retroarch.log-tailer :as log]
             [ezand.retro2mqtt.retroarch.mqtt :as retro-mqtt])
@@ -31,6 +32,10 @@
   (when-let [config-details (config-extractor/config-details config-dir)]
     (publish-event! mqtt-client retro-mqtt/topic-retroarch-details config-details true))
 
+  (when-let [udp-config (:udp retroarch-config)]
+    (when-let [retroarch-version (retro-udp/retroarch-version udp-config)]
+      (publish-event! mqtt-client retro-mqtt/topic-retroarch-version retroarch-version true)))
+
   (-> (log/tail-log-file! listening? log-dir {:publish-fn (partial publish-event! mqtt-client)})
       (future)))
 
@@ -46,8 +51,12 @@
 
 (defn retroarch-provider
   [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
-  (when discovery?
-    (retro-mqtt/publish-homeassistant-discovery! mqtt-client))
+  (let [retroarch-version (when-let [udp-config (-> config :retroarch :udp)]
+                            (retro-udp/retroarch-version udp-config))]
+    (publish-event! mqtt-client retro-mqtt/topic-retroarch-version retroarch-version true)
+    (when discovery?
+      (retro-mqtt/publish-homeassistant-discovery! mqtt-client retroarch-version)))
+
   (let [config (-> (update-in config [:retroarch :log-dir] io/file)
                    (update-in [:retroarch :config-dir] io/file))]
     (->RetroarchProvider mqtt-client (:retroarch config))))

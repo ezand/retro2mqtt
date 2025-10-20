@@ -44,7 +44,9 @@ Planned / potential support:
 
 ### 🎮 RetroArch Configuration
 
-To enable retro2mqtt to monitor RetroArch activity, you must enable logging in RetroArch:
+To enable retro2mqtt to monitor RetroArch activity, you need to configure both logging and network commands:
+
+#### Logging Setup
 
 1. Open RetroArch
 2. Navigate to **Settings → Logging**
@@ -54,10 +56,26 @@ To enable retro2mqtt to monitor RetroArch activity, you must enable logging in R
     - **Timestamp Log Files** - Enable this option (recommended)
 4. Note the log file directory location (typically `~/.config/retroarch/logs` on Linux/macOS or
    `%APPDATA%\RetroArch\logs` on Windows)
-5. Configure retro2mqtt to point to this directory
+
+#### Network Commands Setup
+
+1. Navigate to **Settings → Network**
+2. Enable the following options:
+    - **Network Commands** - Enable this option
+    - **Network Command Port** - Note the UDP port (default: `55355`)
+3. Configure retro2mqtt with the appropriate host and port
+
+**Note:** Depending on your RetroArch distribution, the network options may not be available in the GUI. In this case,
+you can manually configure them in `retroarch.cfg`:
+
+```
+network_cmd_enable = "true"
+network_cmd_port = "55355"
+```
 
 The application will automatically detect and tail the most recent log file, switching to newer logs as they are
-created.
+created. Additionally, it will fetch configuration details via UDP network commands to retrieve user-specific
+information like netplay nickname and achievements settings.
 
 ### 📡 MQTT Broker
 

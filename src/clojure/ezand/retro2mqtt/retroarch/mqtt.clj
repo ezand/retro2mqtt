@@ -106,11 +106,10 @@
 
 ;; Publish Configurations
 (defn publish-homeassistant-discovery!
-  ([mqtt-client]
-   (publish-homeassistant-discovery! mqtt-client false))
-  ([mqtt-client remove-entities?]
-   ; TODO get retroarch version initially
-   (let [device (retroarch-device-config "")
+  ([mqtt-client retroarch-version]
+   (publish-homeassistant-discovery! mqtt-client retroarch-version false))
+  ([mqtt-client retroarch-version remove-entities?]
+   (let [device (retroarch-device-config retroarch-version)
          entities (map
                     (fn [{:keys [unique_id json_attributes_topic attribute-state-topics retain-attributes?] :as config}]
                       (when (and json_attributes_topic attribute-state-topics)
@@ -160,7 +159,7 @@
       (mqtt/publish! mqtt-client* topic-retroarch-cmd-interface-port 53553))
 
   ; Add entities
-  (publish-homeassistant-discovery! mqtt-client*)
+  (publish-homeassistant-discovery! mqtt-client* "1.21.0")
 
   ; Remove entities
   (do (publish-homeassistant-discovery! mqtt-client* true)

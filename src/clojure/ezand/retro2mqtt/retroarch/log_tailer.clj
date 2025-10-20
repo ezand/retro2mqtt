@@ -101,9 +101,7 @@
                               (publish-fn retroarch-mqtt/topic-retroarch-content-last-played game-title true)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-loaded? true false)
                               (publish-fn retroarch-mqtt/topic-retroarch-content-running? true false)
-                              (publish-fn retroarch-mqtt/topic-retroarch-status "running" false))
-                            ; TODO publish content image
-                            )}
+                              (publish-fn retroarch-mqtt/topic-retroarch-status "running" false)))}
    :content-unloaded? {:regexp #"\[INFO\] \[Core\]: Content ran for a total of"
                        :update-fn some?
                        :on-match-fn (fn [publish-fn _]

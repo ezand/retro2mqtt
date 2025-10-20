@@ -6,7 +6,10 @@
          :client-id-prefix "retro2mqtt"}
   :retroarch {:enabled? true
               :config-dir "/lib/retroarch/config"
-              :log-dir "/app/retroarch/logs"}
+              :log-dir "/app/retroarch/logs"
+              :udp {:host "localhost"
+                    :port 55355
+                    :timeout 10000}}
   :launchbox {:enabled? false}
   :hyperspin {:enabled? false}
   :integrations {:home-assistant {:discovery? true}}}}
