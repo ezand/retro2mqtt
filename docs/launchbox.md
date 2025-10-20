@@ -1,3 +1,5 @@
+![Banner](launchbox_banner.png)
+
 # LaunchBox / BigBox Configuration
 
 retro2mqtt integrates with [LaunchBox](https://www.launchbox-app.com/) and BigBox via the [launchbox2mqtt](https://github.com/ezand/launchbox2mqtt/) plugin.
