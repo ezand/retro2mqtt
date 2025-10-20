@@ -1,3 +1,5 @@
+![Banner](retroarch_banner.png)
+
 # RetroArch Configuration
 
 retro2mqtt provides comprehensive support for [RetroArch](https://www.retroarch.com/), including log monitoring and ROM analysis.
