@@ -6,6 +6,7 @@
 ;;;;;;;;;;;;;;;;;;
 ;; State Topcis ;;
 ;;;;;;;;;;;;;;;;;;
+(def ^:const topic-retroarch-details "retroarch/details")
 (def ^:const topic-retroarch-status "retroarch/status")
 (def ^:const topic-retroarch-core "retroarch/core")
 (def ^:const topic-retroarch-core-details "retroarch/core/details")
@@ -62,7 +63,8 @@
                              topic-retroarch-version {:key :retroarch-version}
                              topic-retroarch-version-build-date {:key :retroarch-build-date}
                              topic-retroarch-version-git-hash {:key :retroarch-version-git-hash}
-                             topic-retroarch-cmd-interface-port {:key :cmd-interface-port}}
+                             topic-retroarch-cmd-interface-port {:key :cmd-interface-port}
+                             topic-retroarch-details {:key :details :data-type :map}}
     :retain-attributes? true
     :icon "mdi:monitor-star"}
    {:unique_id "retroarch_core"
