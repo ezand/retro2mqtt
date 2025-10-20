@@ -26,18 +26,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn- -start-listening!
   [mqtt-client {:keys [^File log-dir ^File config-dir] :as retroarch-config}]
-  (println (str printer/yellow "♻️ Listening for RetroArch events" printer/reset))
-  (reset! listening? true)
+  (when-not @listening?
+    (println (str printer/yellow "♻️ Listening for RetroArch events" printer/reset))
+    (reset! listening? true)
 
-  (when-let [config-details (config-extractor/config-details config-dir)]
-    (publish-event! mqtt-client retro-mqtt/topic-retroarch-details config-details true))
+    (when-let [config-details (config-extractor/config-details config-dir)]
+      (publish-event! mqtt-client retro-mqtt/topic-retroarch-details config-details true))
 
-  (when-let [udp-config (:udp retroarch-config)]
-    (when-let [retroarch-version (retro-udp/retroarch-version udp-config)]
-      (publish-event! mqtt-client retro-mqtt/topic-retroarch-version retroarch-version true)))
+    (when-let [udp-config (:udp retroarch-config)]
+      (when-let [retroarch-version (retro-udp/retroarch-version udp-config)]
+        (publish-event! mqtt-client retro-mqtt/topic-retroarch-version retroarch-version true)))
 
-  (-> (log/tail-log-file! listening? log-dir {:publish-fn (partial publish-event! mqtt-client)})
-      (future)))
+    (-> (log/tail-log-file! listening? log-dir {:publish-fn (partial publish-event! mqtt-client)})
+        (future))))
 
 (defn- -stop-listening!
   []

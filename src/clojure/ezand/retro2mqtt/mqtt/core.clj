@@ -6,6 +6,7 @@
            (com.hivemq.client.mqtt.mqtt5 Mqtt5BlockingClient)
            (com.hivemq.client.mqtt.mqtt5.message.publish Mqtt5Publish)
            (com.hivemq.client.mqtt.mqtt5.message.subscribe Mqtt5Subscription)
+           (com.hivemq.client.mqtt.mqtt5.message.unsubscribe Mqtt5Unsubscribe)
            (java.nio.charset StandardCharsets)
            (java.util UUID)))
 
@@ -121,6 +122,10 @@
       (throw t))))
 
 (defn unsubscribe!
+  [^Mqtt5BlockingClient mqtt-client ^Mqtt5Unsubscribe subscription]
+  (.unsubscribe mqtt-client subscription))
+
+(defn unsubscribe-topic!
   "Unsubscribe from a topic."
   [^Mqtt5BlockingClient mqtt-client ^String topic]
   (-> mqtt-client
@@ -144,4 +149,4 @@
   (subscribe! mqtt-client* ["retroarch/content/crc32"] :at-least-once
               (fn [x] (println "XXXXX" (String. x StandardCharsets/UTF_8))))
 
-  (unsubscribe! mqtt-client* "retroarch/content/crc32"))
+  (unsubscribe-topic! mqtt-client* "retroarch/content/crc32"))

@@ -103,11 +103,10 @@
 
 ;; Publish Configurations
 (defn publish-homeassistant-discovery!
-  ([mqtt-client]
-   (publish-homeassistant-discovery! mqtt-client false))
-  ([mqtt-client remove-entities?]
-   ; TODO get launchbox version initially
-   (let [device (launchbox-device-config "")
+  ([mqtt-client launchbox-version]
+   (publish-homeassistant-discovery! mqtt-client launchbox-version false))
+  ([mqtt-client launchbox-version remove-entities?]
+   (let [device (launchbox-device-config launchbox-version)
          entities (map
                     (fn [{:keys [unique_id json_attributes_topic attribute-state-topics retain-attributes?] :as config}]
                       (when (and json_attributes_topic attribute-state-topics)
