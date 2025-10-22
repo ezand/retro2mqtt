@@ -1,6 +1,7 @@
 (ns ezand.retro2mqtt.retroarch.log-tailer
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
+            [ezand.retro2mqtt.logger :as log]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.retroarch.info-file :as info]
             [ezand.retro2mqtt.retroarch.mqtt :as retroarch-mqtt]
@@ -8,6 +9,8 @@
             [ezand.retro2mqtt.utils :as util]
             [superstring.core :as str])
   (:import (java.io File RandomAccessFile)))
+
+(def ^:private logger (log/create-logger! *ns*))
 
 ;;;;;;;;;;;
 ;; Utils ;;
@@ -160,7 +163,8 @@
                         :state-topic retroarch-mqtt/topic-retroarch-version-git-hash
                         :retain? true}
    :retroarch-cmd-interface-port {:regexp #"\[INFO\] \[NetCMD\]: bringing_up_command_interface_at_port (.+)."
-                                  :update-fn #(util/with-suppressed-errors (Integer/parseInt (first-match %)))
+                                  :update-fn #(util/with-suppressed-errors logger "Unable to parse number"
+                                                (Integer/parseInt (first-match %)))
                                   :state-topic retroarch-mqtt/topic-retroarch-cmd-interface-port
                                   :retain? true}})
 
@@ -177,7 +181,7 @@
     {:keys [patterns publish-fn poll-interval-ms wait-interval-ms]
      :or {patterns interesting-log-patterns
           publish-fn (fn [state-topic data retain?]
-                       (println (format "Publish to %s (retain?=%s): %s" state-topic data retain?)))
+                       (log/debug logger "Publish message" {:state-topic state-topic :data data :retain? retain?}))
           poll-interval-ms 100
           wait-interval-ms 1000}}]
    (println (str printer/yellow "♻️ Tailing latest RetroArch log-file in " (.getAbsoluteFile log-dir) printer/reset))
@@ -201,7 +205,7 @@
            (do
              (close-reader raf)
              (let [new-raf (open-log-reader latest-file)]
-               (println (str printer/yellow "📄 Current RetroArch log-file: " (.getAbsolutePath latest-file) printer/reset))
+               (log/info logger (str "Current RetroArch log-file: " (.getAbsolutePath latest-file)))
                (recur latest-file new-raf (.length latest-file))))
 
            ;; Read from current log file
@@ -209,13 +213,14 @@
            (if-let [line (.readLine raf)]
              (do
                (when-let [[pattern-key data state-topic retain? on-match-fn] (match-line patterns line)]
-                 (println (format "Matched log-line [%s]: %s" (name pattern-key) data))
+                 (log/debug logger "Matched log-line" {:pattern pattern-key :data data})
                  (try (cond
                         state-topic (publish-fn state-topic (maybe-serialize-data data) retain?)
                         on-match-fn (on-match-fn publish-fn data)
-                        :else (println (format "Unhandled pattern match key (%s): %s" pattern-key data)))
+                        :else (log/warn logger "Unhandled pattern match key" {:pattern pattern-key :data data}))
                       (catch Throwable t
-                        (.printStackTrace t))))
+                        (log/error logger "error processing matched pattern"
+                                   {:pattern pattern-key :data data :exception t}))))
                (recur current-file raf (.getFilePointer raf)))
              (do
                (Thread/sleep ^Long poll-interval-ms)

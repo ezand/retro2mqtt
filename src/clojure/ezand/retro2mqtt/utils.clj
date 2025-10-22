@@ -1,15 +1,17 @@
 (ns ezand.retro2mqtt.utils
   (:require [clojure.java.io :as io]
-            [superstring.core :as str]))
+            [ezand.retro2mqtt.logger :as log]
+            [superstring.core :as str])
+  (:import (org.slf4j Logger)))
 
 (defmacro with-suppressed-errors
-  "Suppress any errors, but prints them so we know they occurred."
+  "Suppress any errors, but logs them so we know they occurred."
   {:style/indent 0}
-  [& body]
+  [^Logger logger ^String msg & body]
   `(try
      ~@body
      (catch Throwable e#
-       (.printStackTrace e#)
+       (log/error ~logger ~msg {:exception e#})
        nil)))
 
 (defn bool->toggle-str
@@ -33,3 +35,8 @@
 (defn homeassistant-config-topic
   [unique-id]
   (format "homeassistant/sensor/%s/config" unique-id))
+
+(def current-os
+  (if (str/includes? (str/lower-case (System/getProperty "os.name")) "windows")
+    :windows
+    :unix-style))

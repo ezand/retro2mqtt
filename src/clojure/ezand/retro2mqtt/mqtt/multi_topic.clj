@@ -1,8 +1,10 @@
 (ns ezand.retro2mqtt.mqtt.multi-topic
   (:require [cheshire.core :as json]
-            [ezand.retro2mqtt.mqtt.core :as mqtt]
-            [superstring.core :as str])
+            [ezand.retro2mqtt.logger :as log]
+            [ezand.retro2mqtt.mqtt.core :as mqtt])
   (:import (java.nio.charset StandardCharsets)))
+
+(def ^:private logger (log/create-logger! *ns*))
 
 ;;;;;;;;;;;;
 ;; States ;;
@@ -15,7 +17,7 @@
 (defn subscribe-topics!
   [mqtt-client state-identifier topic->cfg target-topic retain?]
   (let [topics (keys topic->cfg)]
-    (println (format "Subscribe to multi-topics [%s]: %s" (name state-identifier) (str/join "," topics)))
+    (log/debug logger "Subscribe to multi-topics" {:identifier state-identifier :topics topics})
     (mqtt/subscribe!
       mqtt-client topics :at-least-once
       (fn [topic ^bytes payload]

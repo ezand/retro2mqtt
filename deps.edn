@@ -2,6 +2,10 @@
  :deps {cheshire/cheshire {:mvn/version "6.1.0"}
         com.hivemq/hivemq-mqtt-client {:mvn/version "1.3.10"}
         medley/medley {:mvn/version "1.4.0"}
+        ch.qos.logback/logback-core {:mvn/version "1.5.20"}
+        ch.qos.logback/logback-classic {:mvn/version "1.5.20"}
+        org.slf4j/slf4j-api {:mvn/version "2.0.17"}
+        org.scala-sbt.ipcsocket/ipcsocket {:mvn/version "1.6.3"}
         superstring/superstring {:mvn/version "3.2.1"}
         yogthos/config {:mvn/version "1.2.1"}}
  :aliases
