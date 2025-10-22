@@ -31,6 +31,36 @@ clj -M:run
 clj -A:dev -M:run
 ```
 
+## 🧪 Testing
+
+Run all tests (automatically discovers all test namespaces):
+
+```bash
+clj -X:test-runner
+```
+
+Run specific test namespace:
+
+```bash
+clj -M:test -e "(require 'ezand.retro2mqtt.utils-test) (clojure.test/run-tests 'ezand.retro2mqtt.utils-test)"
+```
+
+Run tests for a specific module:
+
+```bash
+# IPC tests
+clj -M:test -e "(require 'ezand.retro2mqtt.ipc.core-test) (clojure.test/run-tests 'ezand.retro2mqtt.ipc.core-test)"
+
+# ROM metadata tests
+clj -M:test -e "(require 'ezand.retro2mqtt.rom.core-test) (clojure.test/run-tests 'ezand.retro2mqtt.rom.core-test)"
+
+# RetroArch log tailer tests
+clj -M:test -e "(require 'ezand.retro2mqtt.retroarch.log-tailer-test) (clojure.test/run-tests 'ezand.retro2mqtt.retroarch.log-tailer-test)"
+
+# MQTT tests
+clj -M:test -e "(require 'ezand.retro2mqtt.mqtt.core-test 'ezand.retro2mqtt.mqtt.multi-topic-test) (clojure.test/run-tests 'ezand.retro2mqtt.mqtt.core-test 'ezand.retro2mqtt.mqtt.multi-topic-test)"
+```
+
 ## 🔨 Building
 
 Build an uberjar:

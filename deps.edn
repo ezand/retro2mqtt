@@ -17,6 +17,11 @@
         :jvm-opts ["-Dconfig=dev-config.edn"]}
   :test {:paths ["src/clojure" "dev" "test" "dev-resources" "resources"]
         :jvm-opts ["-Dconfig=dev-config.edn"]}
+  ;; Run tests with clj -X:test-runner
+  :test-runner {:extra-paths ["test" "dev-resources"]
+                :extra-deps {io.github.cognitect-labs/test-runner
+                             {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                :exec-fn cognitect.test-runner.api/test}
   ;; Run with clj -M:run
   :run {:main-opts ["-m" "ezand.retro2mqtt.core"]}
   ;; Start REPL with clj -M:repl
