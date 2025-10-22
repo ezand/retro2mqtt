@@ -4,6 +4,7 @@
         medley/medley {:mvn/version "1.4.0"}
         ch.qos.logback/logback-core {:mvn/version "1.5.20"}
         ch.qos.logback/logback-classic {:mvn/version "1.5.20"}
+        org.clojure/core.async {:mvn/version "1.8.741"}
         org.slf4j/slf4j-api {:mvn/version "2.0.17"}
         org.scala-sbt.ipcsocket/ipcsocket {:mvn/version "1.6.3"}
         superstring/superstring {:mvn/version "3.2.1"}
