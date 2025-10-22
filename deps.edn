@@ -13,7 +13,9 @@
  {;; Run with clj -T:build function-in-build
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.10" :git/sha "deedd62"}}
           :ns-default build}
-  :dev {:paths ["src/java" "src/clojure" "dev" "dev-resources" "resources"]
+  :dev {:paths ["src/clojure" "dev" "dev-resources" "resources"]
+        :jvm-opts ["-Dconfig=dev-config.edn"]}
+  :test {:paths ["src/clojure" "dev" "test" "dev-resources" "resources"]
         :jvm-opts ["-Dconfig=dev-config.edn"]}
   ;; Run with clj -M:run
   :run {:main-opts ["-m" "ezand.retro2mqtt.core"]}

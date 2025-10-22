@@ -5,7 +5,7 @@
             [superstring.core :as str])
   (:import (java.io BufferedReader InputStream InputStreamReader OutputStream PrintWriter)
            (java.net StandardProtocolFamily UnixDomainSocketAddress)
-           (java.nio.channels ServerSocketChannel SocketChannel)
+           (java.nio.channels Channels ServerSocketChannel SocketChannel)
            (java.nio.charset StandardCharsets)
            (java.nio.file Paths)
            (org.scalasbt.ipcsocket Win32NamedPipeServerSocket Win32NamedPipeSocket)))
@@ -19,14 +19,14 @@
   "Get InputStream from either Win32NamedPipeSocket or SocketChannel"
   [pipe-connection]
   (if (instance? SocketChannel pipe-connection)
-    (.getInputStream (.socket ^SocketChannel pipe-connection))
+    (Channels/newInputStream ^SocketChannel pipe-connection)
     (.getInputStream pipe-connection)))
 
 (defn- pipe->output-stream
   "Get OutputStream from either Win32NamedPipeSocket or SocketChannel"
   [pipe-connection]
   (if (instance? SocketChannel pipe-connection)
-    (.getOutputStream (.socket ^SocketChannel pipe-connection))
+    (Channels/newOutputStream ^SocketChannel pipe-connection)
     (.getOutputStream pipe-connection)))
 
 ;;;;;;;;;;;;
