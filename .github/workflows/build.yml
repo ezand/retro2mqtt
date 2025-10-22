@@ -35,6 +35,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-clojure-
 
+      - name: Run tests
+        run: clojure -X:test-runner
+
       - name: Build uberjar
         run: clojure -T:build uber
 
