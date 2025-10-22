@@ -132,21 +132,3 @@
       (.unsubscribeWith)
       (.topicFilter topic)
       (.send)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Multi-Topic Support ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (do (require '[config.core :as cfg])
-      (def config* (:retro2mqtt cfg/env))
-      (def mqtt-client* (-> (create-client (:mqtt config*))
-                            (connect! (:mqtt config*)))))
-
-  (subscribe! mqtt-client* ["retroarch/content/crc32"] :at-least-once
-              (fn [x] (println "XXXXX" (String. x StandardCharsets/UTF_8))))
-
-  (unsubscribe-topic! mqtt-client* "retroarch/content/crc32"))

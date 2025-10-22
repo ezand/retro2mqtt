@@ -225,25 +225,3 @@
              (do
                (Thread/sleep ^Long poll-interval-ms)
                (recur current-file raf position)))))))))
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (match-line interesting-log-patterns "[INFO] [Core]: Loading dynamic libretro core from: \"/Users/user/Library/Application Support/RetroArch/cores/bsnes2014_accuracy_libretro.dylib\"")
-  (match-line interesting-log-patterns "[INFO] [Core]: Using content: \"/Users/user/Library/Application Support/RetroArch/downloads/Super Mario World (U) [!].zip\".")
-  (match-line interesting-log-patterns "[INFO] [Content]: CRC32: 0xa31bead4.")
-  (match-line interesting-log-patterns "[INFO] [Video]: Set video size to: 897x672.")
-  (match-line interesting-log-patterns "[INFO] CPU Model Name: Apple M2 Max")
-  (match-line interesting-log-patterns "[INFO] Capabilities: NEON VFPV3 VFPV4")
-  (match-line interesting-log-patterns "[INFO] Version: 1.21.0")
-  (match-line interesting-log-patterns "[INFO] Git: 05f94af4")
-  (match-line interesting-log-patterns "[INFO] Built: Apr 30 2025")
-  (match-line interesting-log-patterns "[INFO] [Display]: Found display driver: \"vulkan\".")
-  (match-line interesting-log-patterns "[INFO] [NetCMD]: bringing_up_command_interface_at_port 55355.")
-  (match-line interesting-log-patterns "[INFO] [Audio]: Set audio input rate to: 48000.00 Hz.")
-  (match-line interesting-log-patterns "[INFO] [Joypad]: Found joypad driver: \"mfi\".")
-  (match-line interesting-log-patterns "[INFO] [Core]: Version of libretro API: 1, Compiled against API: 1")
-  (match-line interesting-log-patterns "[INFO] [Environ]: SET_PIXEL_FORMAT: RGB565.")
-  (match-line interesting-log-patterns "[INFO] [Core]: Content ran for a total of: 00 hours, 00 minutes, 05 seconds.")
-  (match-line interesting-log-patterns "[INFO] [Content]: Updating firmware status for: \"/Users/user/Library/Application Support/RetroArch/cores/bsnes2014_accuracy_libretro.dylib\" on \"/Users/user/Documents/RetroArch/system\".\n"))

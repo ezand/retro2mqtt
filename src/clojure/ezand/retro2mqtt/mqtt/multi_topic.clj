@@ -38,17 +38,3 @@
             (catch Throwable t
               (.printStackTrace t)
               (throw t))))))))
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (do (require '[config.core :as cfg])
-      (def config* (:retro2mqtt cfg/env))
-      (def mqtt-client* (-> (mqtt/create-client (:mqtt config*))
-                            (mqtt/connect! (:mqtt config*)))))
-
-  (subscribe-topics! mqtt-client* :attributes
-                     ["retroarch/content/crc32" "retroarch/content/video_size"]
-                     "homeassistant/retroarch/attributes"
-                     false))

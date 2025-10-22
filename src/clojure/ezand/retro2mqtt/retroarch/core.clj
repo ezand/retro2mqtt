@@ -3,10 +3,10 @@
             [ezand.retro2mqtt.mqtt.core :as mqtt]
             [ezand.retro2mqtt.printer :as printer]
             [ezand.retro2mqtt.provider :as provider]
-            [ezand.retro2mqtt.retroarch.udp-connector :as retro-udp]
             [ezand.retro2mqtt.retroarch.config-extractor :as config-extractor]
             [ezand.retro2mqtt.retroarch.log-tailer :as log]
-            [ezand.retro2mqtt.retroarch.mqtt :as retro-mqtt])
+            [ezand.retro2mqtt.retroarch.mqtt :as retro-mqtt]
+            [ezand.retro2mqtt.retroarch.udp-connector :as retro-udp])
   (:import (java.io File)))
 
 ;;;;;;;;;;;
@@ -61,18 +61,3 @@
   (let [config (-> (update-in config [:retroarch :log-dir] io/file)
                    (update-in [:retroarch :config-dir] io/file))]
     (->RetroarchProvider mqtt-client (:retroarch config))))
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (do (require '[config.core :as cfg])
-      (def config* (:retro2mqtt cfg/env))
-      (def mqtt-client* (-> (mqtt/create-client (:mqtt config*))
-                            (mqtt/connect! (:mqtt config*))))
-      (def retroarch-config* {:log-dir (io/file (System/getenv "RETROARCH_LOG_DIR"))
-                              :config-dir (io/file (System/getenv "RETROARCH_CONFIG_DIR"))}))
-
-  (-start-listening! mqtt-client* retroarch-config*)
-
-  (-stop-listening!))

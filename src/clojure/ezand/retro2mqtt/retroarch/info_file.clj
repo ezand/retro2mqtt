@@ -32,11 +32,3 @@
                    (if (str/blank? unquoted) nil unquoted)])))
          (into {})
          (medley/map-keys #(keyword (str/lisp-case (name %)))))))
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (require '[clojure.java.io :as io])
-
-  (parse-info (io/file (io/resource "bsnes2014_accuracy_libretro.info"))))

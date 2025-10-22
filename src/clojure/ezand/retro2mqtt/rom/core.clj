@@ -204,17 +204,3 @@
       (:error result)
       (or (util/trim-to-nil game-title)
           (util/trim-to-nil fallback-title)))))
-
-;;;;;;;;;;;;;
-;; Testing ;;
-;;;;;;;;;;;;;
-(comment
-  (->> (io/resource "Super Mario World (U) [!].zip")
-       (io/file)
-       (.getAbsolutePath)
-       (extract-metadata))
-
-  (->> (io/resource "Super Mario World (U) [!].zip")
-       (io/file)
-       (.getAbsolutePath)
-       (extract-game-name)))
