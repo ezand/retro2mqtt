@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-clojure-
 
       - name: Run tests
-        run: clojure -X:test-runner
+        run: clojure -M:test "$@"
 
       - name: Build uberjar
         run: clojure -T:build uber

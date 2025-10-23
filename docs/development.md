@@ -33,22 +33,38 @@ clj -A:dev -M:run
 
 ## 🧪 Testing
 
-Run all tests (automatically discovers all test namespaces):
+Run all tests:
 
 ```bash
-clj -X:test-runner
+clj -M:test "$@" # Directly
+
+# Conveniance scripts
+bin/kaocha       # Unix / Mac OS
+bin/kaocha.ps1   # Powershell
+bin/kaocha.bat   # Windows Command
 ```
 
 Run specific test namespace:
 
 ```bash
-clj -M:test -e "(require 'ezand.retro2mqtt.utils-test) (clojure.test/run-tests 'ezand.retro2mqtt.utils-test)"
+clj -M:test "$@" --focus ezand.retro2mqtt.ipc.core-test # Directly
+bin/kaocha --focus ezand.retro2mqtt.ipc.core-test       # Conveniance script
 ```
 
-Run tests for specific modules:
+With detailed outout:
+```bash
+bin/kaocha --reporter documentation
+```
+
+With profiling:
+```bash
+bin/kaocha --plugin kaocha.plugin/profiling
+```
+
+Watch for changes:
 
 ```bash
-clj -M:test -e "(require 'ezand.retro2mqtt.ipc.core-test) (clojure.test/run-tests 'ezand.retro2mqtt.ipc.core-test)"
+bin/kaocha --watch
 ```
 
 ## 🔨 Building
