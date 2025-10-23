@@ -36,7 +36,7 @@ clj -A:dev -M:run
 Run all tests:
 
 ```bash
-clj -M:test "$@" # Directly
+clj -M:-runner "$@" # Directly
 
 # Conveniance scripts
 bin/kaocha       # Unix / Mac OS
@@ -47,7 +47,7 @@ bin/kaocha.bat   # Windows Command
 Run specific test namespace:
 
 ```bash
-clj -M:test "$@" --focus ezand.retro2mqtt.ipc.core-test # Directly
+clj -M:test-runner "$@" --focus ezand.retro2mqtt.ipc.core-test # Directly
 bin/kaocha --focus ezand.retro2mqtt.ipc.core-test       # Conveniance script
 ```
 

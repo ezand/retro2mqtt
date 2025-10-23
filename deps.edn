@@ -16,8 +16,10 @@
   :dev {:paths ["src/clojure" "dev" "dev-resources" "resources"]
         :jvm-opts ["-Dconfig=dev-config.edn"]}
   :test {:paths ["src/clojure" "dev" "test" "dev-resources" "resources"]
-         :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
-         :main-opts ["-m" "kaocha.runner"]}
+         :jvm-opts ["-Dconfig=dev-config.edn"]}
+  :test-runner {:paths ["src/clojure" "dev" "test" "dev-resources" "resources"]
+                :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
+                :main-opts ["-m" "kaocha.runner"]}
   ;; Run with clj -M:run
   :run {:main-opts ["-m" "ezand.retro2mqtt.core"]}
   ;; Start REPL with clj -M:repl

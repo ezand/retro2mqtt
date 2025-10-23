@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-clj -M:test "$@"
+clj -M:test-runner "$@"

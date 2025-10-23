@@ -1,1 +1,1 @@
-powershell -command clojure -M:test "%*"
+powershell -command clojure -M:test-runner "%*"

@@ -1,1 +1,1 @@
-clojure -M:test "$args"
+clojure -M:test-runner "$args"
