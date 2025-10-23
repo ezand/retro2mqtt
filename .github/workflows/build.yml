@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-clojure-
 
       - name: Run tests
-        run: clojure -M:test "$@"
+        run: clojure -M:test "$@" --reporter documentation --plugin kaocha.plugin/profiling
 
       - name: Build uberjar
         run: clojure -T:build uber
