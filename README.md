@@ -29,6 +29,7 @@ Currently supported:
 
 - **[RetroArch](https://www.retroarch.com/)** - Comprehensive support for log monitoring and ROM analysis. See the [RetroArch configuration guide](docs/retroarch.md) for setup instructions.
 - **[LaunchBox / BigBox](https://www.launchbox-app.com/)** - Integration via the [launchbox2mqtt](https://github.com/ezand/launchbox2mqtt/) plugin. See the [LaunchBox configuration guide](docs/launchbox.md) for setup instructions.
+- **[audio2mqtt](https://github.com/ezand/audio2mqtt)** - Audio playback monitoring and MQTT integration for capturing in-game events.
 
 Planned / potential support:
 
