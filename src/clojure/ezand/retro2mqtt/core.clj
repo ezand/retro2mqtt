@@ -1,6 +1,7 @@
 (ns ezand.retro2mqtt.core
   (:gen-class)
   (:require [config.core :refer [env]]
+            [ezand.retro2mqtt.audio.core :as audio]
             [ezand.retro2mqtt.launchbox.core :as launchbox]
             [ezand.retro2mqtt.mqtt.core :as mqtt]
             [ezand.retro2mqtt.printer :as printer]
@@ -10,6 +11,7 @@
 (defn -main [& args]
   (let [{mqtt-config :mqtt
          {retroarch-enabled? :enabled?} :retroarch
+         {audio-enabled? :enabled?} :audio
          {launchbox-enabled? :enabled?} :launchbox
          {hyperspin-enabled? :enabled?} :hyperspin
          :as config} (:retro2mqtt env)]
@@ -19,6 +21,9 @@
       (when retroarch-enabled?
         (->> (retroarch/retroarch-provider mqtt-client config)
              (provider/start-listening!)))
+      (when audio-enabled?
+        (-> (audio/audio-provider mqtt-client config)
+            (provider/start-listening!)))
       (when launchbox-enabled?
         (-> (launchbox/launchbox-provider mqtt-client config)
             (provider/start-listening!))))

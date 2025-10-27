@@ -11,5 +11,6 @@
                     :port 55355
                     :timeout 10000}}
   :launchbox {:enabled? false}
+  :audio {:enabled? false}
   :hyperspin {:enabled? false}
   :integrations {:home-assistant {:discovery? true}}}}

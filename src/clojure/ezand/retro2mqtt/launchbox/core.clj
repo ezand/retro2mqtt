@@ -19,7 +19,7 @@
 ;;   We only handle HomeAssistant discovery. ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn- -start-listening!
-  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as launchbox-config}]
+  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
   (when-not @listening?
     (println (str printer/yellow "♻️ Listening for LaunchBox events" printer/reset))
     (when discovery?
@@ -29,6 +29,7 @@
                               (when (= topic launchbox-mqtt/topic-launchbox-details)
                                 (let [{:keys [version]} (-> (String. payload StandardCharsets/UTF_8)
                                                             (json/parse-string keyword))]
+                                  ;; TODO causes inifite loop??
                                   (launchbox-mqtt/publish-homeassistant-discovery! mqtt-client version false)))))
            (swap! subscriptions conj)))
     (reset! listening? true)))
@@ -50,4 +51,4 @@
   (when discovery?
     ; Start of with version 'Unknown', will be updated by retained message or LaunchBox startup
     (launchbox-mqtt/publish-homeassistant-discovery! mqtt-client "Unknown"))
-  (->LaunchBoxProvider mqtt-client (:launchbox config)))
+  (->LaunchBoxProvider mqtt-client config))
