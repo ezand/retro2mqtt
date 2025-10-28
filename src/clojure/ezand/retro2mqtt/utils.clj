@@ -40,3 +40,25 @@
   (if (str/includes? (str/lower-case (System/getProperty "os.name")) "windows")
     :windows
     :unix-style))
+
+(defn topic-matches?
+  "Check if a topic matches a pattern with MQTT wildcards.
+  - # matches zero or more levels (multi-level wildcard)
+  - + matches exactly one level (single-level wildcard)
+
+  Examples:
+    (topic-matches? \"sensor/+/temperature\" \"sensor/living-room/temperature\") => true
+    (topic-matches? \"sensor/#\" \"sensor/living-room/temperature\") => true
+    (topic-matches? \"sensor/+\" \"sensor/living-room/temperature\") => false"
+  [pattern topic]
+  (let [pattern-parts (str/split pattern #"/")
+        topic-parts (str/split topic #"/")]
+    (loop [pp pattern-parts
+           tp topic-parts]
+      (cond
+        (empty? pp) (empty? tp)
+        (= (first pp) "#") true
+        (empty? tp) false
+        (or (= (first pp) "+") (= (first pp) (first tp)))
+        (recur (rest pp) (rest tp))
+        :else false))))

@@ -172,3 +172,44 @@
       (is (= "sensor" (second segments)))
       (is (= "test" (nth segments 2)))
       (is (= "config" (last segments))))))
+
+(deftest topic-matches?-test
+  (testing "Exact match without wildcards"
+    (is (util/topic-matches? "sensor/temperature" "sensor/temperature"))
+    (is (not (util/topic-matches? "sensor/temperature" "sensor/humidity")))
+    (is (not (util/topic-matches? "sensor/temperature" "sensor/temperature/extra"))))
+
+  (testing "Single-level wildcard (+)"
+    (is (util/topic-matches? "sensor/+/temperature" "sensor/living-room/temperature"))
+    (is (util/topic-matches? "sensor/+/temperature" "sensor/bedroom/temperature"))
+    (is (not (util/topic-matches? "sensor/+/temperature" "sensor/living-room/bedroom/temperature")))
+    (is (not (util/topic-matches? "sensor/+" "sensor/living-room/temperature")))
+    (is (util/topic-matches? "+/temperature" "sensor/temperature"))
+    (is (util/topic-matches? "sensor/+" "sensor/temperature")))
+
+  (testing "Multi-level wildcard (#)"
+    (is (util/topic-matches? "sensor/#" "sensor/living-room/temperature"))
+    (is (util/topic-matches? "sensor/#" "sensor/temperature"))
+    (is (util/topic-matches? "sensor/#" "sensor/a/b/c/d"))
+    (is (not (util/topic-matches? "sensor/#" "other/temperature")))
+    (is (util/topic-matches? "#" "any/topic/at/all"))
+    (is (util/topic-matches? "audio_events/event/#" "audio_events/event/foo"))
+    (is (util/topic-matches? "audio_events/event/#" "audio_events/event/foo/bar")))
+
+  (testing "Combined wildcards"
+    (is (util/topic-matches? "sensor/+/temperature/#" "sensor/living-room/temperature/reading"))
+    (is (util/topic-matches? "sensor/+/temperature/#" "sensor/bedroom/temperature/current/value"))
+    (is (not (util/topic-matches? "sensor/+/temperature/#" "sensor/living-room/humidity"))))
+
+  (testing "Edge cases"
+    (is (util/topic-matches? "" ""))
+    (is (not (util/topic-matches? "sensor" "")))
+    (is (not (util/topic-matches? "sensor" "sensor/foo")))
+    (is (util/topic-matches? "sensor/#" "sensor/foo"))
+    (is (not (util/topic-matches? "" "sensor")))
+    (is (util/topic-matches? "#" ""))
+    (is (util/topic-matches? "sensor" "sensor")))
+
+  (testing "Multi-level wildcard only matches from its position"
+    (is (not (util/topic-matches? "sensor/#" "other/sensor/temp")))
+    (is (util/topic-matches? "sensor/#" "sensor"))))

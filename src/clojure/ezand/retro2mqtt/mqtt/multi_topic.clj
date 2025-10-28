@@ -1,7 +1,8 @@
 (ns ezand.retro2mqtt.mqtt.multi-topic
   (:require [cheshire.core :as json]
             [ezand.retro2mqtt.logger :as log]
-            [ezand.retro2mqtt.mqtt.core :as mqtt])
+            [ezand.retro2mqtt.mqtt.core :as mqtt]
+            [ezand.retro2mqtt.utils :as util])
   (:import (java.nio.charset StandardCharsets)))
 
 (def ^:private logger (log/create-logger! *ns*))
@@ -22,14 +23,16 @@
       mqtt-client topics :at-least-once
       (fn [topic ^bytes payload]
         ; Global subscriptions, so we need to filter on topics
-        (when (get (set topics) topic)
+        (when (some #(util/topic-matches? % topic) topics)
           (try
             (let [data (String. payload StandardCharsets/UTF_8)
                   topic-cfg (get topic->cfg topic)
+                  transform-fn (:transform-fn topic-cfg)
                   data-type (get topic-cfg :data-type :string)
                   data-kwd (:key topic-cfg)
                   new-data (case data-type
-                             :map (json/parse-string data keyword)
+                             :map (cond-> (json/parse-string data keyword)
+                                    transform-fn (transform-fn))
                              {data-kwd data})
                   merged-data (merge (get @multi-topic-states state-identifier)
                                      new-data)]

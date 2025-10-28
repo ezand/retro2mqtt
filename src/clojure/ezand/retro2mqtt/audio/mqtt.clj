@@ -8,7 +8,8 @@
 ;;;;;;;;;;;;;;;;;;
 (def ^:const topic-audio-system-running? "audio_events/system/running")
 (def ^:const topic-audio-system-details "audio_events/system/details")
-(def ^:const topic-audio-event "audio_events/event/#")
+(def ^:const topic-audio-event "audio_events/event")
+(def ^:const topic-audio-event-last-song "audio_events/event/last_song")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HomeAssistant Discovery ;;
@@ -24,6 +25,7 @@
 
 ;; Topics
 (def ^:private ^:const topic-homeassistant-audio-attributes "homeassistant/sensor/audio2mqtt_attributes")
+(def ^:private ^:const topic-homeassistant-audio-event-attributes "homeassistant/sensor/audio2mqtt_event_attributes")
 
 ;; Entity Configuration
 (def ^:private ^:const entity-configurations
@@ -34,9 +36,16 @@
     :attribute-state-topics {topic-audio-system-details {:data-type :map}}
     :retain-attributes? true
     :icon "mdi:volume-high"}
-   {:unique_id "audio2mqtt_running"
-    :name "Is audio2mqtt Running"
-    :state_topic topic-audio-system-running?
+   {:unique_id "audio2mqtt_last_audio_event"
+    :name "Last Audio Event"
+    :state_topic topic-audio-event-last-song
+    :json_attributes_topic topic-homeassistant-audio-event-attributes
+    :attribute-state-topics {topic-audio-event
+                             {:data-type :map
+                              :transform-fn (fn [{:keys [metadata] :as audio-event}]
+                                              (-> (dissoc audio-event :metadata)
+                                                  (merge metadata)))}}
+    :retain-attributes? true
     :icon "mdi:volume-high"}])
 
 ;; Publish Configurations
