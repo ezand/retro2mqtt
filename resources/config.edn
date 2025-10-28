@@ -11,6 +11,7 @@
                     :port 55355
                     :timeout 10000}}
   :launchbox {:enabled? false}
-  :audio {:enabled? false}
+  :audio {:enabled? false
+          :topic-prefix "audio_events"}
   :hyperspin {:enabled? false}
   :integrations {:home-assistant {:discovery? true}}}}
