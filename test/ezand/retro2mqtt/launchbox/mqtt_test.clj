@@ -2,73 +2,75 @@
   (:require [clojure.test :refer [deftest is testing]]
             [ezand.retro2mqtt.launchbox.mqtt :as launchbox-mqtt]))
 
-(deftest state-topic-constants-test
-  (testing "All state topic constants are defined"
-    (is (string? launchbox-mqtt/topic-launchbox-content-loaded?))
-    (is (string? launchbox-mqtt/topic-launchbox-content-running?))
-    (is (string? launchbox-mqtt/topic-launchbox-content))
-    (is (string? launchbox-mqtt/topic-launchbox-content-last-played))
-    (is (string? launchbox-mqtt/topic-launchbox-content-details))
-    (is (string? launchbox-mqtt/topic-launchbox-emulator-loaded?))
-    (is (string? launchbox-mqtt/topic-launchbox-emulator-running?))
-    (is (string? launchbox-mqtt/topic-launchbox-emulator))
-    (is (string? launchbox-mqtt/topic-launchbox-emulator-last-loaded))
-    (is (string? launchbox-mqtt/topic-launchbox-emulator-details))
-    (is (string? launchbox-mqtt/topic-launchbox-running?))
-    (is (string? launchbox-mqtt/topic-launchbox-details))
-    (is (string? launchbox-mqtt/topic-launchbox-bigbox-running?))
-    (is (string? launchbox-mqtt/topic-launchbox-bigbox-locked?))
-    (is (string? launchbox-mqtt/topic-launchbox-system-event?)))
+(def test-topics (launchbox-mqtt/launchbox-topics "launchbox"))
 
-  (testing "Topic strings follow expected format"
-    (is (.startsWith launchbox-mqtt/topic-launchbox-content-loaded? "launchbox/"))
-    (is (.startsWith launchbox-mqtt/topic-launchbox-running? "launchbox/"))
-    (is (.startsWith launchbox-mqtt/topic-launchbox-emulator "launchbox/"))))
+(deftest launchbox-topics-function-test
+  (testing "launchbox-topics function returns map with all keys"
+    (let [topics (launchbox-mqtt/launchbox-topics "launchbox")]
+      (is (map? topics))
+      (is (contains? topics :content-loaded))
+      (is (contains? topics :content-running))
+      (is (contains? topics :content))
+      (is (contains? topics :content-last-played))
+      (is (contains? topics :content-details))
+      (is (contains? topics :emulator-loaded))
+      (is (contains? topics :emulator-running))
+      (is (contains? topics :emulator))
+      (is (contains? topics :emulator-last-loaded))
+      (is (contains? topics :emulator-details))
+      (is (contains? topics :running))
+      (is (contains? topics :details))
+      (is (contains? topics :bigbox-running))
+      (is (contains? topics :bigbox-locked))
+      (is (contains? topics :system-event))))
+
+  (testing "All topic values are strings"
+    (let [topics (launchbox-mqtt/launchbox-topics "launchbox")]
+      (doseq [[k v] topics]
+        (is (string? v)))))
+
+  (testing "Topics follow expected format with default prefix"
+    (let [topics (launchbox-mqtt/launchbox-topics "launchbox")]
+      (is (.startsWith (:content-loaded topics) "launchbox/"))
+      (is (.startsWith (:running topics) "launchbox/"))
+      (is (.startsWith (:emulator topics) "launchbox/"))))
+
+  (testing "Topics use custom prefix"
+    (let [topics (launchbox-mqtt/launchbox-topics "custom")]
+      (is (.startsWith (:content-loaded topics) "custom/"))
+      (is (.startsWith (:running topics) "custom/"))
+      (is (.startsWith (:emulator topics) "custom/")))))
 
 (deftest state-topic-uniqueness-test
   (testing "All state topics are unique"
-    (let [topics [launchbox-mqtt/topic-launchbox-content-loaded?
-                  launchbox-mqtt/topic-launchbox-content-running?
-                  launchbox-mqtt/topic-launchbox-content
-                  launchbox-mqtt/topic-launchbox-content-last-played
-                  launchbox-mqtt/topic-launchbox-content-details
-                  launchbox-mqtt/topic-launchbox-emulator-loaded?
-                  launchbox-mqtt/topic-launchbox-emulator-running?
-                  launchbox-mqtt/topic-launchbox-emulator
-                  launchbox-mqtt/topic-launchbox-emulator-last-loaded
-                  launchbox-mqtt/topic-launchbox-emulator-details
-                  launchbox-mqtt/topic-launchbox-running?
-                  launchbox-mqtt/topic-launchbox-details
-                  launchbox-mqtt/topic-launchbox-bigbox-running?
-                  launchbox-mqtt/topic-launchbox-bigbox-locked?
-                  launchbox-mqtt/topic-launchbox-system-event?]]
-      (is (= (count topics) (count (set topics)))))))
+    (let [topic-values (vals test-topics)]
+      (is (= (count topic-values) (count (set topic-values)))))))
 
 (deftest specific-topic-values-test
   (testing "Content topics"
-    (is (= "launchbox/content/loaded" launchbox-mqtt/topic-launchbox-content-loaded?))
-    (is (= "launchbox/content/running" launchbox-mqtt/topic-launchbox-content-running?))
-    (is (= "launchbox/content" launchbox-mqtt/topic-launchbox-content))
-    (is (= "launchbox/content/last_played" launchbox-mqtt/topic-launchbox-content-last-played))
-    (is (= "launchbox/content/details" launchbox-mqtt/topic-launchbox-content-details)))
+    (is (= "launchbox/content/loaded" (:content-loaded test-topics)))
+    (is (= "launchbox/content/running" (:content-running test-topics)))
+    (is (= "launchbox/content" (:content test-topics)))
+    (is (= "launchbox/content/last_played" (:content-last-played test-topics)))
+    (is (= "launchbox/content/details" (:content-details test-topics))))
 
   (testing "Emulator topics"
-    (is (= "launchbox/emulator/loaded" launchbox-mqtt/topic-launchbox-emulator-loaded?))
-    (is (= "launchbox/emulator/running" launchbox-mqtt/topic-launchbox-emulator-running?))
-    (is (= "launchbox/emulator" launchbox-mqtt/topic-launchbox-emulator))
-    (is (= "launchbox/emulator/last_loaded" launchbox-mqtt/topic-launchbox-emulator-last-loaded))
-    (is (= "launchbox/emulator/details" launchbox-mqtt/topic-launchbox-emulator-details)))
+    (is (= "launchbox/emulator/loaded" (:emulator-loaded test-topics)))
+    (is (= "launchbox/emulator/running" (:emulator-running test-topics)))
+    (is (= "launchbox/emulator" (:emulator test-topics)))
+    (is (= "launchbox/emulator/last_loaded" (:emulator-last-loaded test-topics)))
+    (is (= "launchbox/emulator/details" (:emulator-details test-topics))))
 
   (testing "LaunchBox main topics"
-    (is (= "launchbox/running" launchbox-mqtt/topic-launchbox-running?))
-    (is (= "launchbox/details" launchbox-mqtt/topic-launchbox-details)))
+    (is (= "launchbox/running" (:running test-topics)))
+    (is (= "launchbox/details" (:details test-topics))))
 
   (testing "BigBox topics"
-    (is (= "launchbox/bigbox/running" launchbox-mqtt/topic-launchbox-bigbox-running?))
-    (is (= "launchbox/bigbox/locked" launchbox-mqtt/topic-launchbox-bigbox-locked?)))
+    (is (= "launchbox/bigbox/running" (:bigbox-running test-topics)))
+    (is (= "launchbox/bigbox/locked" (:bigbox-locked test-topics))))
 
   (testing "System topics"
-    (is (= "launchbox/system/event" launchbox-mqtt/topic-launchbox-system-event?))))
+    (is (= "launchbox/system/event" (:system-event test-topics)))))
 
 (deftest launchbox-device-config-test
   (testing "Device config structure with version"
@@ -96,13 +98,13 @@
       (is (= "Unbroken Software, LLC" (:manufacturer device))))))
 
 (deftest entity-configurations-structure-test
-  (testing "entity-configurations is a vector"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+  (testing "entity-configurations returns a vector"
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (is (vector? configs))
       (is (pos? (count configs)))))
 
   (testing "All entities have required keys"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (doseq [config configs]
         (is (contains? config :unique_id))
         (is (contains? config :name))
@@ -110,39 +112,39 @@
         (is (contains? config :icon)))))
 
   (testing "Entity unique IDs are strings"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (doseq [config configs]
         (is (string? (:unique_id config))))))
 
   (testing "Entity names are strings"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (doseq [config configs]
         (is (string? (:name config))))))
 
   (testing "State topics are valid strings"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (doseq [config configs]
         (is (string? (:state_topic config)))
         (is (.startsWith (:state_topic config) "launchbox/")))))
 
   (testing "Icons follow MDI format"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (doseq [config configs]
         (is (.startsWith (:icon config) "mdi:"))))))
 
 (deftest entity-configurations-count-test
   (testing "Has expected number of entities"
-    (let [configs @#'launchbox-mqtt/entity-configurations]
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)]
       (is (= 12 (count configs))))))
 
 (deftest entity-configurations-unique-ids-test
   (testing "All entity unique IDs are unique"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           unique-ids (map :unique_id configs)]
       (is (= (count unique-ids) (count (set unique-ids))))))
 
   (testing "Expected unique IDs exist"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           unique-ids (set (map :unique_id configs))]
       (is (contains? unique-ids "launchbox"))
       (is (contains? unique-ids "launchbox_bigbox_running"))
@@ -159,7 +161,7 @@
 
 (deftest entity-configurations-with-attributes-test
   (testing "Entities with JSON attributes have correct structure"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           configs-with-attrs (filter :json_attributes_topic configs)]
       (is (= 5 (count configs-with-attrs)))
       (doseq [config configs-with-attrs]
@@ -168,7 +170,7 @@
         (is (map? (:attribute-state-topics config))))))
 
   (testing "Attribute state topics have correct data types"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           configs-with-attrs (filter :attribute-state-topics configs)]
       (doseq [config configs-with-attrs]
         (let [attr-topics (:attribute-state-topics config)]
@@ -179,28 +181,28 @@
 
 (deftest entity-configurations-specific-entities-test
   (testing "LaunchBox main entity configuration"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           launchbox-entity (first (filter #(= "launchbox" (:unique_id %)) configs))]
       (is (some? launchbox-entity))
       (is (= "LaunchBox" (:name launchbox-entity)))
-      (is (= launchbox-mqtt/topic-launchbox-running? (:state_topic launchbox-entity)))
+      (is (= (:running test-topics) (:state_topic launchbox-entity)))
       (is (true? (:retain-attributes? launchbox-entity)))
       (is (= "mdi:monitor-star" (:icon launchbox-entity)))))
 
   (testing "Content entity configuration"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           content-entity (first (filter #(= "launchbox_content" (:unique_id %)) configs))]
       (is (some? content-entity))
       (is (= "Current Game" (:name content-entity)))
-      (is (= launchbox-mqtt/topic-launchbox-content (:state_topic content-entity)))
+      (is (= (:content test-topics) (:state_topic content-entity)))
       (is (= "mdi:gamepad-variant" (:icon content-entity)))))
 
   (testing "Emulator entity configuration"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           emulator-entity (first (filter #(= "launchbox_emulator" (:unique_id %)) configs))]
       (is (some? emulator-entity))
       (is (= "Loaded Emulator" (:name emulator-entity)))
-      (is (= launchbox-mqtt/topic-launchbox-emulator (:state_topic emulator-entity)))
+      (is (= (:emulator test-topics) (:state_topic emulator-entity)))
       (is (= "mdi:monitor-star" (:icon emulator-entity))))))
 
 (deftest publish-homeassistant-discovery-function-test
@@ -231,13 +233,13 @@
 
 (deftest entity-icon-consistency-test
   (testing "Content-related entities use gamepad icon"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           content-entities (filter #(.contains (:unique_id %) "content") configs)]
       (doseq [entity content-entities]
         (is (= "mdi:gamepad-variant" (:icon entity))))))
 
   (testing "Main entities use monitor-star icon"
-    (let [configs @#'launchbox-mqtt/entity-configurations
+    (let [configs (#'launchbox-mqtt/entity-configurations test-topics)
           monitor-entities (filter #(contains? #{"launchbox" "launchbox_emulator" "launchbox_emulator_last_loaded"}
                                                (:unique_id %))
                                    configs)]
@@ -246,13 +248,13 @@
 
 (deftest topic-naming-convention-test
   (testing "State topics use underscores for multi-word properties"
-    (is (.contains launchbox-mqtt/topic-launchbox-content-last-played "last_played"))
-    (is (.contains launchbox-mqtt/topic-launchbox-emulator-last-loaded "last_loaded")))
+    (is (.contains (:content-last-played test-topics) "last_played"))
+    (is (.contains (:emulator-last-loaded test-topics) "last_loaded")))
 
-  (testing "Boolean state topics end with ?"
-    (is (.endsWith launchbox-mqtt/topic-launchbox-content-loaded? "loaded"))
-    (is (.endsWith launchbox-mqtt/topic-launchbox-content-running? "running"))
-    (is (.endsWith launchbox-mqtt/topic-launchbox-running? "running"))
-    (is (.endsWith launchbox-mqtt/topic-launchbox-bigbox-running? "running"))
-    (is (.endsWith launchbox-mqtt/topic-launchbox-bigbox-locked? "locked"))
-    (is (.endsWith launchbox-mqtt/topic-launchbox-system-event? "event"))))
+  (testing "State topics end with expected suffixes"
+    (is (.endsWith (:content-loaded test-topics) "loaded"))
+    (is (.endsWith (:content-running test-topics) "running"))
+    (is (.endsWith (:running test-topics) "running"))
+    (is (.endsWith (:bigbox-running test-topics) "running"))
+    (is (.endsWith (:bigbox-locked test-topics) "locked"))
+    (is (.endsWith (:system-event test-topics) "event"))))

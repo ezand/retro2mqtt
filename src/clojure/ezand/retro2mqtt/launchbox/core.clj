@@ -20,20 +20,21 @@
 ;;   We only handle HomeAssistant discovery. ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn- -start-listening!
-  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
+  [mqtt-client launchbox-topics {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
   (when-not @listening?
     (println (str printer/yellow "♻️ Listening for LaunchBox events" printer/reset))
     (when discovery?
       ; Update HomeAssistant config when LaunchBox version gets published
-      (->> (mqtt/subscribe! mqtt-client [launchbox-mqtt/topic-launchbox-details] nil
-                            (fn [topic ^bytes payload]
-                              (when (= topic launchbox-mqtt/topic-launchbox-details)
-                                (let [{:keys [version] :as details} (-> (String. payload StandardCharsets/UTF_8)
-                                                                        (json/parse-string keyword))]
-                                  (when-not (= @system-details details)
-                                    (reset! system-details details)
-                                    (launchbox-mqtt/update-main-entity! mqtt-client version))))))
-           (swap! subscriptions conj)))
+      (let [details-topic (:details launchbox-topics)]
+        (->> (mqtt/subscribe! mqtt-client [details-topic] nil
+                              (fn [topic ^bytes payload]
+                                (when (= topic details-topic)
+                                  (let [{:keys [version] :as details} (-> (String. payload StandardCharsets/UTF_8)
+                                                                          (json/parse-string keyword))]
+                                    (when-not (= @system-details details)
+                                      (reset! system-details details)
+                                      (launchbox-mqtt/update-main-entity! mqtt-client launchbox-topics version))))))
+             (swap! subscriptions conj))))
     (reset! listening? true)))
 
 (defn- -stop-listening!
@@ -43,14 +44,17 @@
   (when-let [subs (not-empty @subscriptions)]
     (map (partial mqtt/unsubscribe! mqtt-client) subs)))
 
-(defrecord LaunchBoxProvider [mqtt-client config]
+(defrecord LaunchBoxProvider [mqtt-client launchbox-topics config]
   provider/RetroProvider
-  (start-listening! [this] (-start-listening! mqtt-client config))
+  (start-listening! [this] (-start-listening! mqtt-client launchbox-topics config))
   (stop-listening! [this] (-stop-listening! mqtt-client)))
 
 (defn launchbox-provider
-  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations :as config}]
-  (when discovery?
-    ; Start of with version 'Unknown', will be updated by retained message or LaunchBox startup
-    (launchbox-mqtt/publish-homeassistant-discovery! mqtt-client "Unknown"))
-  (->LaunchBoxProvider mqtt-client config))
+  [mqtt-client {{{:keys [discovery?]} :home-assistant} :integrations
+                {:keys [topic-prefix] :or {topic-prefix "launchbox"}} :launchbox
+                :as config}]
+  (let [launchbox-topics (launchbox-mqtt/launchbox-topics topic-prefix)]
+    (when discovery?
+      ; Start of with version 'Unknown', will be updated by retained message or LaunchBox startup
+      (launchbox-mqtt/publish-homeassistant-discovery! mqtt-client launchbox-topics "Unknown"))
+    (->LaunchBoxProvider mqtt-client launchbox-topics config)))

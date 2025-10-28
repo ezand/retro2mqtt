@@ -10,7 +10,8 @@
               :udp {:host "localhost"
                     :port 55355
                     :timeout 10000}}
-  :launchbox {:enabled? false}
+  :launchbox {:enabled? false
+              :topic-prefix "launchbox"}
   :audio {:enabled? false
           :topic-prefix "audio_events"}
   :hyperspin {:enabled? false}

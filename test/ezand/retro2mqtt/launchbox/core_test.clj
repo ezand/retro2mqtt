@@ -7,19 +7,22 @@
   (:import (clojure.lang Atom)
            (ezand.retro2mqtt.launchbox.core LaunchBoxProvider)))
 
+(def test-topics (launchbox-mqtt/launchbox-topics "launchbox"))
+
 (deftest launchbox-provider-record-test
   (testing "LaunchBoxProvider record exists"
     (is (class? LaunchBoxProvider)))
 
   (testing "LaunchBoxProvider implements RetroProvider protocol"
-    (let [provider (launchbox-core/->LaunchBoxProvider nil {})]
+    (let [provider (launchbox-core/->LaunchBoxProvider nil test-topics {})]
       (is (satisfies? provider/RetroProvider provider))))
 
   (testing "LaunchBoxProvider has expected fields"
     (let [mock-client :mock-client
           mock-config {:launchbox {:test "config"}}
-          provider (launchbox-core/->LaunchBoxProvider mock-client mock-config)]
+          provider (launchbox-core/->LaunchBoxProvider mock-client test-topics mock-config)]
       (is (= :mock-client (:mqtt-client provider)))
+      (is (= test-topics (:launchbox-topics provider)))
       (is (= mock-config (:config provider))))))
 
 (deftest listening-state-atoms-test
@@ -69,7 +72,7 @@
           (let [mock-client :mock-client
                 config {:integrations {:home-assistant {:discovery? true}}
                         :launchbox {:test "config"}}
-                provider (launchbox-core/->LaunchBoxProvider mock-client config)]
+                provider (launchbox-core/->LaunchBoxProvider mock-client test-topics config)]
             (provider/start-listening! provider)
             ;; Verify listening state changed
             (is (true? @listening-atom))))
@@ -90,7 +93,7 @@
 
           (let [mock-client :mock-client
                 config {:launchbox {:test "config"}}
-                provider (launchbox-core/->LaunchBoxProvider mock-client config)]
+                provider (launchbox-core/->LaunchBoxProvider mock-client test-topics config)]
             (provider/stop-listening! provider)
             ;; Verify listening state changed
             (is (false? @listening-atom))))
@@ -141,8 +144,8 @@
         (reset! subs-atom [])
         (with-redefs [mqtt/subscribe! (fn [& _] :new-subscription)]
           (let [provider (launchbox-core/->LaunchBoxProvider
-                           :mock-client {:integrations {:home-assistant {:discovery? true}}})]
-            (#'launchbox-core/-start-listening! :mock-client (:config provider))
+                           :mock-client test-topics {:integrations {:home-assistant {:discovery? true}}})]
+            (#'launchbox-core/-start-listening! :mock-client test-topics (:config provider))
             ;; Subscription should be added
             (is (some #(= :new-subscription %) @subs-atom))))
         (finally
@@ -160,7 +163,7 @@
                                         (swap! call-count inc)
                                         :mock-subscription)]
           (let [provider (launchbox-core/->LaunchBoxProvider
-                           :mock-client {:integrations {:home-assistant {:discovery? true}}})]
+                           :mock-client test-topics {:integrations {:home-assistant {:discovery? true}}})]
             (provider/start-listening! provider)
             (provider/start-listening! provider)
             (provider/start-listening! provider)
