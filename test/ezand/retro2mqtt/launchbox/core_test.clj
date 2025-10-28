@@ -58,7 +58,7 @@
             provider (launchbox-core/launchbox-provider mock-client config)]
         (is (instance? LaunchBoxProvider provider))
         (is (= :mock-client (:mqtt-client provider)))
-        (is (= {:test "config"} (:config provider)))))))
+        (is (= config (:config provider)))))))
 
 (deftest start-listening-behavior-test
   (testing "start-listening! can be called on provider"
@@ -107,7 +107,7 @@
                          :launchbox {:setting1 "value1"
                                      :setting2 "value2"}}
             provider (launchbox-core/launchbox-provider mock-client full-config)]
-        (is (= {:setting1 "value1" :setting2 "value2"} (:config provider)))))))
+        (is (= full-config (:config provider)))))))
 
 (deftest discovery-flag-handling-test
   (testing "Discovery flag is read from correct path in config"
