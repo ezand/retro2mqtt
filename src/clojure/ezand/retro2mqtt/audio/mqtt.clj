@@ -39,6 +39,7 @@
     :state_topic topic-audio-system-running?
     :icon "mdi:volume-high"}])
 
+;; Publish Configurations
 (defn update-main-entity!
   [mqtt-client system-details]
   (let [device (audio-device-config system-details)
@@ -47,7 +48,6 @@
                    (assoc main-entity :device device)
                    {:retain true})))
 
-;; Publish Configurations
 (defn publish-homeassistant-discovery!
   ([mqtt-client system-details]
    (publish-homeassistant-discovery! mqtt-client system-details false))

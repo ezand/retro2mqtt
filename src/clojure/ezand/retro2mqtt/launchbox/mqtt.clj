@@ -102,6 +102,14 @@
     :icon "mdi:gamepad-variant"}])
 
 ;; Publish Configurations
+(defn update-main-entity!
+  [mqtt-client launchbox-version]
+  (let [device (launchbox-device-config launchbox-version)
+        {:keys [unique_id] :as main-entity} (first entity-configurations)]
+    (mqtt/publish! mqtt-client (util/homeassistant-config-topic unique_id)
+                   (assoc main-entity :device device)
+                   {:retain true})))
+
 (defn publish-homeassistant-discovery!
   ([mqtt-client launchbox-version]
    (publish-homeassistant-discovery! mqtt-client launchbox-version false))

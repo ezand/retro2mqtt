@@ -11,6 +11,7 @@
 ;;;;;;;;;;;
 (defonce listening? (atom false))
 (defonce subscriptions (atom []))
+(defonce system-details (atom {}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Provider Implementation                   ;;
@@ -27,10 +28,11 @@
       (->> (mqtt/subscribe! mqtt-client [launchbox-mqtt/topic-launchbox-details] nil
                             (fn [topic ^bytes payload]
                               (when (= topic launchbox-mqtt/topic-launchbox-details)
-                                (let [{:keys [version]} (-> (String. payload StandardCharsets/UTF_8)
-                                                            (json/parse-string keyword))]
-                                  ;; TODO causes inifite loop??
-                                  (launchbox-mqtt/publish-homeassistant-discovery! mqtt-client version false)))))
+                                (let [{:keys [version] :as details} (-> (String. payload StandardCharsets/UTF_8)
+                                                                        (json/parse-string keyword))]
+                                  (when-not (= @system-details details)
+                                    (reset! system-details details)
+                                    (launchbox-mqtt/update-main-entity! mqtt-client version))))))
            (swap! subscriptions conj)))
     (reset! listening? true)))
 
